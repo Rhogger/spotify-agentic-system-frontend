@@ -1,18 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&display=swap");
 @import "tailwindcss";
 @import "@nuxt/ui";
 
 @theme static {
-  --font-sans: 'Public Sans', sans-serif;
+  --font-sans: "Spline Sans", sans-serif;
+  --font-display: "Spline Sans", sans-serif;
 
-  --color-green-50: #EFFDF5;
-  --color-green-100: #D9FBE8;
-  --color-green-200: #B3F5D1;
-  --color-green-300: #75EDAE;
-  --color-green-400: #00DC82;
-  --color-green-500: #00C16A;
-  --color-green-600: #00A155;
-  --color-green-700: #007F45;
-  --color-green-800: #016538;
-  --color-green-900: #0A5331;
-  --color-green-950: #052E16;
+  /* Primary Brand Color */
+  --color-primary: #38e07b;
+
+  /* Backgrounds & Surfaces */
+  --color-background: #122017; /* Main dark background */
+  --color-surface-base: #121212; /* Chat header, Deepest surface */
+  --color-surface-elevated: #181818; /* Player bar */
+  --color-surface-highlight: #1e1e1e; /* Right sidebar */
+  --color-surface-card: #282828; /* Cards, Modals, Playlists */
+  --color-surface-input: #3e3e3e; /* Form inputs */
+
+  /* Text Colors */
+  --color-text-main: rgba(255, 255, 255, 0.9);
+  --color-text-muted: rgba(255, 255, 255, 0.7);
+  --color-text-dim: rgba(255, 255, 255, 0.5);
+
+  /* Borders & Dividers */
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-hover: rgba(255, 255, 255, 0.2);
+
+  /* Status / Accents */
+  --color-accent: #38e07b;
 }
