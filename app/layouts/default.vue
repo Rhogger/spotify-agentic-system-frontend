@@ -9,12 +9,12 @@
     <div class="flex flex-1 overflow-hidden relative">
       <AppSidebar />
 
-      <AppMain>
+      <UMain class="flex-1 overflow-hidden relative">
         <slot />
-      </AppMain>
+      </UMain>
     </div>
 
-    <AppPlayer />
+    <!-- <AppPlayer /> -->
     <AppDrawer />
     <AppChatFab />
   </div>

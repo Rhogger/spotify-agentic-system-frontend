@@ -94,42 +94,41 @@ const tooltips: Record<string, string> = {
       />
     </div>
 
-    <div class="space-y-3 pt-2">
-      <UTooltip
-        text="Permitir conteúdo explícito"
-        v-bind="baseTooltip"
-        class="w-full"
-      >
-        <UCheckbox
-          v-model="filters.explicit"
-          label="Explícito"
-          color="primary"
-          class="border-border"
-          :ui="{
-            root: 'flex flex-row-reverse justify-between w-full items-center',
-            label: 'text-sm font-medium text-text-muted',
-            wrapper: 'ms-0',
-          }"
-        />
-      </UTooltip>
-      <UTooltip
-        text="Filtrar por popularidade"
-        v-bind="baseTooltip"
-        class="w-full"
-      >
-        <UCheckbox
-          v-model="filters.popular"
-          label="Popular"
-          color="primary"
-          class="border-border"
-          :ui="{
-            root: 'flex flex-row-reverse justify-between w-full items-center',
-            label: 'text-sm font-medium text-text-muted',
-            wrapper: 'ms-0',
-          }"
-        />
-      </UTooltip>
-    </div>
+    <UTooltip
+      text="Permitir conteúdo explícito"
+      v-bind="baseTooltip"
+      class="w-full"
+    >
+      <UCheckbox
+        v-model="filters.explicit"
+        label="Explícito"
+        color="primary"
+        class="border-border"
+        :ui="{
+          root: 'flex flex-row-reverse justify-between w-full items-center',
+          label: 'text-sm font-medium text-text-muted',
+          wrapper: 'ms-0',
+        }"
+      />
+    </UTooltip>
+
+    <UTooltip
+      text="Filtrar por popularidade"
+      v-bind="baseTooltip"
+      class="w-full"
+    >
+      <UCheckbox
+        v-model="filters.popular"
+        label="Popular"
+        color="primary"
+        class="border-border"
+        :ui="{
+          root: 'flex flex-row-reverse justify-between w-full items-center',
+          label: 'text-sm font-medium text-text-muted',
+          wrapper: 'ms-0',
+        }"
+      />
+    </UTooltip>
 
     <div class="space-y-2">
       <label class="text-sm font-medium text-text-muted">Década</label>
@@ -153,7 +152,7 @@ const tooltips: Record<string, string> = {
       v-bind="primaryButton"
       label="Gerar recomendação"
       block
-      class="mt-4 font-bold text-black"
+      class="my-4 font-bold text-black"
     />
   </div>
 </template>

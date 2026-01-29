@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ghostCard } from "~/binds/cards";
+
 interface Props {
   id: number | string;
   name: string;
@@ -14,8 +16,8 @@ defineProps<Props>();
 </script>
 
 <template>
-  <div
-    class="group flex items-center gap-3 p-2 rounded-md cursor-pointer transition-all duration-200 outline-none hover:bg-surface-highlight hover:ring-2 hover:ring-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-surface-highlight active:scale-[0.98] active:bg-surface-highlight"
+  <UCard
+    v-bind="ghostCard"
     tabindex="0"
     role="button"
     @click="navigateTo('/playlist/' + id)"
@@ -46,5 +48,5 @@ defineProps<Props>();
         {{ type }} • {{ count }}
       </span>
     </div>
-  </div>
+  </UCard>
 </template>

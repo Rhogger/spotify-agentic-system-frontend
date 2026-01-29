@@ -9,14 +9,14 @@
     <div class="flex flex-1 overflow-hidden relative">
       <AppSidebar hide-filters />
 
-      <main
+      <UMain
         class="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-background"
       >
         <slot />
-      </main>
+      </UMain>
     </div>
 
-    <AppPlayer />
+    <!-- <AppPlayer /> -->
     <AppDrawer />
     <AppChatFab />
   </div>

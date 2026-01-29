@@ -1,5 +1,5 @@
 <template>
-  <div class="public-layout min-h-screen bg-background text-foreground">
+  <UMain class="min-h-screen bg-background text-foreground">
     <slot />
-  </div>
+  </UMain>
 </template>

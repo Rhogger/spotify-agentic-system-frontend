@@ -69,64 +69,68 @@ const recommendations = [
 </script>
 
 <template>
-  <div class="h-full overflow-y-auto p-6 custom-scrollbar">
-    <div
-      class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4"
-    >
-      <h2 class="text-2xl font-bold text-text-main">Recomendação Gerada</h2>
-
-      <UButton
-        v-bind="ghostButton"
-        icon="i-heroicons-plus-circle"
-        label="Adicionar tudo à playlist"
-        class="px-4"
-      />
-    </div>
-
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-6">
+  <UPage class="h-full overflow-y-auto custom-scrollbar">
+    <UPageBody>
       <div
-        v-for="track in recommendations"
-        :key="track.id"
-        class="group relative bg-surface-card p-4 rounded-md hover:bg-surface-highlight transition-colors duration-300 flex flex-col gap-4 cursor-pointer"
+        class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4"
       >
-        <div class="relative w-full aspect-square shadow-lg">
-          <img
-            :src="track.image"
-            :alt="track.title"
-            class="w-full h-full object-cover rounded-md"
-          />
+        <h2 class="text-2xl font-bold text-text-main">Recomendação Gerada</h2>
 
-          <UButton
-            v-bind="baseButton"
-            icon="i-heroicons-plus"
-            color="neutral"
-            variant="solid"
-            class="absolute top-2 right-2 size-10 bg-black/60 hover:bg-primary hover:text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-10"
-            title="Adicionar à playlist"
-          />
-
-          <PlayButton
-            size="xl"
-            class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 shadow-xl hover:scale-105 pl-1"
-          />
-        </div>
-
-        <div class="flex flex-col min-w-0">
-          <h3
-            class="font-bold text-text-main truncate text-base hover:underline"
-          >
-            {{ track.title }}
-          </h3>
-
-          <p class="text-sm text-text-muted truncate hover:underline">
-            {{ track.artist }}
-          </p>
-
-          <p class="text-xs text-primary/80 truncate mt-1">
-            {{ track.genre }}
-          </p>
-        </div>
+        <UButton
+          v-bind="ghostButton"
+          icon="i-heroicons-plus-circle"
+          label="Adicionar tudo à playlist"
+          class="px-4"
+        />
       </div>
-    </div>
-  </div>
+
+      <UPageGrid>
+        <UPageCard
+          v-for="track in recommendations"
+          :key="track.id"
+          class="group cursor-pointer hover:bg-surface-highlight transition-colors duration-300"
+        >
+          <div class="flex flex-col gap-4">
+            <div class="relative w-full aspect-square shadow-lg">
+              <img
+                :src="track.image"
+                :alt="track.title"
+                class="w-full h-full object-cover rounded-md"
+              />
+
+              <UButton
+                v-bind="baseButton"
+                icon="i-heroicons-plus"
+                color="neutral"
+                variant="solid"
+                class="absolute top-2 right-2 size-10 bg-black/60 hover:bg-primary hover:text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-10"
+                title="Adicionar à playlist"
+              />
+
+              <PlayButton
+                size="xl"
+                class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 shadow-xl hover:scale-105 pl-1"
+              />
+            </div>
+
+            <div class="flex flex-col min-w-0">
+              <h3
+                class="font-bold text-text-main truncate text-base hover:underline"
+              >
+                {{ track.title }}
+              </h3>
+
+              <p class="text-sm text-text-muted truncate hover:underline">
+                {{ track.artist }}
+              </p>
+
+              <p class="text-xs text-primary/80 truncate mt-1">
+                {{ track.genre }}
+              </p>
+            </div>
+          </div>
+        </UPageCard>
+      </UPageGrid>
+    </UPageBody>
+  </UPage>
 </template>

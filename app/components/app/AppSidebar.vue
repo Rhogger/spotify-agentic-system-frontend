@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { iconButton } from "~/binds/buttons";
 
-defineProps<{
+const props = defineProps<{
   hideFilters?: boolean;
 }>();
 
@@ -11,6 +11,26 @@ const isCollapsed = ref(false);
 function toggleSidebar() {
   isCollapsed.value = !isCollapsed.value;
 }
+
+const accordionItems = computed(() => {
+  const items = [];
+
+  if (!props.hideFilters) {
+    items.push({
+      label: "Filtros",
+      icon: "i-heroicons-adjustments-horizontal",
+      slot: "filters",
+    });
+  }
+
+  items.push({
+    label: "Sua Biblioteca",
+    icon: "i-heroicons-book-open",
+    slot: "playlists",
+  });
+
+  return items;
+});
 </script>
 
 <template>
@@ -18,8 +38,8 @@ function toggleSidebar() {
     class="flex-col gap-2 border-r border-border bg-background/50 overflow-y-auto hidden md:flex shrink-0 transition-all duration-300 ease-in-out"
     :class="[isCollapsed ? 'w-16' : 'w-80']"
   >
-    <div class="flex-1 p-4 space-y-6 flex flex-col">
-      <div class="flex justify-end pr-2">
+    <div class="flex-1 flex flex-col p-4">
+      <div class="flex justify-end mb-4">
         <UButton
           v-bind="iconButton"
           :icon="
@@ -32,23 +52,24 @@ function toggleSidebar() {
         />
       </div>
 
-      <div class="flex flex-col shrink-0">
-        <div v-if="!isCollapsed && !hideFilters" class="flex flex-col gap-4">
-          <div class="px-1 text-lg font-bold text-text-main mb-2">Filters</div>
+      <div v-if="!isCollapsed" class="flex-1 flex flex-col min-h-0">
+        <UAccordion
+          :items="accordionItems"
+          :ui="{
+            root: 'flex flex-col gap-4',
+            item: 'border-none',
+            trigger: 'cursor-pointer',
+          }"
+          multiple
+        >
+          <template #filters class="bg-red">
+            <SidebarFilter />
+          </template>
 
-          <SidebarFilter />
-        </div>
-      </div>
-
-      <div
-        :class="[
-          hideFilters ? 'flex-1 min-h-0' : 'mt-auto shrink-0',
-          { 'pt-4 border-t border-border': !isCollapsed && !hideFilters },
-        ]"
-      >
-        <div v-if="!isCollapsed" class="h-full">
-          <SidebarPlaylists />
-        </div>
+          <template #playlists>
+            <SidebarPlaylists />
+          </template>
+        </UAccordion>
       </div>
     </div>
   </aside>

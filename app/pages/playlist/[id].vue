@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ghostButton, destructiveButton, iconButton } from "~/binds/buttons";
 import { baseDropdown } from "~/binds/dropdown";
+import { baseTooltip } from "~/binds/tooltips";
 
 const route = useRoute();
 const playlistId = route.params.id;
@@ -57,24 +58,32 @@ const tracks = ref([
   },
 ]);
 
-const actionItems = [
-  {
-    label: "Integrar ao Spotify",
-    icon: "i-simple-icons-spotify",
-    onSelect: () => {
-      console.log("Integate");
+const actionItems = computed(() => {
+  const isDefaultPlaylist = Number(playlist.value.id) === 1;
+
+  return [
+    {
+      label: "Integrar ao Spotify",
+      icon: "i-simple-icons-spotify",
+      onSelect: () => {
+        console.log("Integate");
+      },
     },
-  },
-  {
-    label: "Deletar",
-    icon: "i-heroicons-trash",
-    onSelect: () => (isDeleteModalOpen.value = true),
-  },
-];
+    {
+      label: "Deletar",
+      icon: "i-heroicons-trash",
+      disabled: isDefaultPlaylist,
+      onSelect: () => (isDeleteModalOpen.value = true),
+      tooltip: isDefaultPlaylist
+        ? "Você não pode deletar sua playlist de músicas curtidas"
+        : undefined,
+    },
+  ];
+});
 </script>
 
 <template>
-  <div
+  <UPage
     class="h-full overflow-y-auto custom-scrollbar"
     :style="{
       background: `linear-gradient(to bottom, ${playlist.dominantColor} 0%, var(--color-background) 100%)`,
@@ -167,6 +176,25 @@ const actionItems = [
             icon="i-heroicons-ellipsis-horizontal"
             class="w-10 h-10"
           />
+
+          <template #item="{ item }">
+            <UTooltip
+              :text="item.tooltip"
+              :prevent="!item.disabled || !item.tooltip"
+              v-bind="baseTooltip"
+              class="w-full"
+            >
+              <div
+                class="flex items-center justify-between w-full"
+                :class="{ 'opacity-50 cursor-not-allowed': item.disabled }"
+              >
+                <div class="flex items-center gap-2">
+                  <UIcon v-if="item.icon" :name="item.icon" class="w-4 h-4" />
+                  <span class="truncate">{{ item.label }}</span>
+                </div>
+              </div>
+            </UTooltip>
+          </template>
         </UDropdownMenu>
       </div>
 
@@ -269,5 +297,5 @@ const actionItems = [
         </div>
       </template>
     </BaseModal>
-  </div>
+  </UPage>
 </template>

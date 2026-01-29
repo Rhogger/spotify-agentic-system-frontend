@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { primaryButton, iconButton } from "~/binds/buttons";
-import { baseTooltip } from "~/binds/tooltips";
+import { primaryButton } from "~/binds/buttons";
+import { dashedCard } from "~/binds/cards";
 
 const isModalOpen = ref(false);
 const newPlaylistName = ref("");
@@ -56,22 +56,29 @@ function handleCreatePlaylist() {
 
 <template>
   <div class="flex flex-col h-full">
-    <div class="flex items-center justify-between mb-2 pl-2 pr-2">
-      <div class="text-lg font-bold text-text-main flex items-center gap-2">
-        <UIcon name="i-heroicons-book-open" class="w-5 h-5" />
-        Sua Biblioteca
-      </div>
+    <div class="space-y-1 p-2">
+      <UCard
+        v-bind="dashedCard"
+        tabindex="0"
+        role="button"
+        @click="isModalOpen = true"
+        @keydown.enter="isModalOpen = true"
+        @keydown.space.prevent="isModalOpen = true"
+      >
+        <div
+          class="w-12 h-12 flex items-center justify-center bg-surface-elevated rounded-md group-hover:bg-white/10 transition-colors"
+        >
+          <UIcon
+            name="i-heroicons-plus"
+            class="w-6 h-6 text-text-muted group-hover:text-white transition-colors"
+          />
+        </div>
+        <span
+          class="font-medium text-text-muted group-hover:text-white transition-colors"
+          >Criar Playlist</span
+        >
+      </UCard>
 
-      <UTooltip text="Criar nova playlist" v-bind="baseTooltip">
-        <UButton
-          v-bind="iconButton"
-          icon="i-heroicons-plus"
-          @click="isModalOpen = true"
-        />
-      </UTooltip>
-    </div>
-
-    <div class="flex-1 overflow-y-auto space-y-1 p-2 custom-scrollbar">
       <PlaylistCard
         v-for="playlist in playlists"
         :key="playlist.id"

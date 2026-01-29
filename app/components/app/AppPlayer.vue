@@ -1,5 +1,15 @@
 <script setup lang="ts">
 import { iconButton } from "~/binds/buttons";
+
+const { isPlayerVisible } = usePlayerState();
+
+onMounted(() => {
+  isPlayerVisible.value = true;
+});
+
+onUnmounted(() => {
+  isPlayerVisible.value = false;
+});
 </script>
 
 <template>
