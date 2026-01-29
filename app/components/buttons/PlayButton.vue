@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { primaryButton } from "~/binds/buttons";
+import { primaryButton } from '~/binds/buttons';
 
 interface Props {
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 withDefaults(defineProps<Props>(), {
-  size: "xl",
+  size: 'xl',
 });
 
 const isPlaying = ref(false);

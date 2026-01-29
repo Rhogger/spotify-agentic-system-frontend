@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ghostCard } from "~/binds/cards";
+import { ghostCard } from '~/binds/cards';
 
 interface Props {
   id: number | string;

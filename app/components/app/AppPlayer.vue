@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { iconButton } from "~/binds/buttons";
+import { iconButton } from '~/binds/buttons';
 
 const { isPlayerVisible } = usePlayerState();
 
@@ -83,7 +83,7 @@ onUnmounted(() => {
             min="0"
             max="100"
             value="0"
-          />
+          >
 
           <span class="hidden md:inline">0:00</span>
         </div>
@@ -103,7 +103,7 @@ onUnmounted(() => {
             min="0"
             max="100"
             value="70"
-          />
+          >
         </div>
       </div>
     </div>

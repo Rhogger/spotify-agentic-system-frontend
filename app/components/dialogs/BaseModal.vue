@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { CardProps } from "@nuxt/ui";
-import { iconButton } from "~/binds/buttons";
-import { baseTooltip } from "~/binds/tooltips";
+import type { CardProps } from '@nuxt/ui';
+import { iconButton } from '~/binds/buttons';
+import { baseTooltip } from '~/binds/tooltips';
 
 /**
  * BaseModal Component
@@ -13,17 +13,17 @@ import { baseTooltip } from "~/binds/tooltips";
 interface Props {
   modelValue: boolean;
   title: string;
-  ui?: Pick<CardProps, "ui">;
+  ui?: Pick<CardProps, 'ui'>;
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(["update:modelValue", "close"]);
+const emit = defineEmits(['update:modelValue', 'close']);
 
 const isOpen = computed({
   get: () => props.modelValue,
   set: (value) => {
-    emit("update:modelValue", value);
-    if (!value) emit("close");
+    emit('update:modelValue', value);
+    if (!value) emit('close');
   },
 });
 </script>
@@ -49,7 +49,10 @@ const isOpen = computed({
               {{ title }}
             </h3>
 
-            <UTooltip text="Fechar" v-bind="baseTooltip">
+            <UTooltip
+              text="Fechar"
+              v-bind="baseTooltip"
+            >
               <UButton
                 v-bind="iconButton"
                 icon="i-heroicons-x-mark"
@@ -63,7 +66,10 @@ const isOpen = computed({
           <slot />
         </div>
 
-        <template #footer v-if="$slots.footer">
+        <template
+          v-if="$slots.footer"
+          #footer
+        >
           <slot name="footer" />
         </template>
       </UCard>

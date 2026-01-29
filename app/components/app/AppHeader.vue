@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { baseDropdown } from "~/binds/dropdown";
+import { baseDropdown } from '~/binds/dropdown';
 
 const items = [
   [
     {
-      label: "Meu Perfil",
-      to: "https://www.spotify.com/account/overview/",
-      target: "_blank",
+      label: 'Meu Perfil',
+      to: 'https://www.spotify.com/account/overview/',
+      target: '_blank',
     },
   ],
   [
     {
-      label: "Sair",
-      icon: "i-heroicons-arrow-left-on-rectangle",
-      to: "http://localhost:3001/",
+      label: 'Sair',
+      icon: 'i-heroicons-arrow-left-on-rectangle',
+      to: 'http://localhost:3001/',
     },
   ],
 ];

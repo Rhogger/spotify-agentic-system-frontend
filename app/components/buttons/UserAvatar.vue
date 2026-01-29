@@ -14,14 +14,14 @@
 interface Props {
   src?: string;
   alt?: string;
-  size?: "3xs" | "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
+  size?: '3xs' | '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   initials?: string;
 }
 
 withDefaults(defineProps<Props>(), {
-  alt: "User",
-  size: "sm",
-  initials: "",
+  alt: 'User',
+  size: 'sm',
+  initials: '',
 });
 </script>
 
@@ -39,7 +39,10 @@ withDefaults(defineProps<Props>(), {
         'font-bold leading-none text-black truncate flex items-center justify-center bg-primary',
     }"
   >
-    <template #fallback v-if="!src">
+    <template
+      v-if="!src"
+      #fallback
+    >
       <div
         class="h-full w-full flex items-center justify-center bg-primary text-black font-bold"
       >

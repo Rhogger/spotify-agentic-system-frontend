@@ -1,5 +1,5 @@
 export const usePlayerState = () => {
-  const isPlayerVisible = useState("isPlayerVisible", () => false);
+  const isPlayerVisible = useState('isPlayerVisible', () => false);
 
   return { isPlayerVisible };
 };

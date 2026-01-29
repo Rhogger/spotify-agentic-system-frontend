@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useChatDrawer } from "~/composables/useChatDrawer";
-import { primaryButton } from "~/binds/buttons";
+import { useChatDrawer } from '~/composables/useChatDrawer';
+import { primaryButton } from '~/binds/buttons';
 
 const { isOpen, toggle } = useChatDrawer();
 const { isPlayerVisible } = usePlayerState();

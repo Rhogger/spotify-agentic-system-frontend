@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { useMouse } from "@vueuse/core";
-import { onMounted, onUnmounted, ref } from "vue";
+import { useMouse } from '@vueuse/core';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 definePageMeta({
-  layout: "public",
+  layout: 'public',
 });
 
 function handleLogin() {
-  navigateTo("/home");
+  navigateTo('/home');
 }
 
 const { x: mouseX, y: mouseY } = useMouse();
@@ -43,14 +43,14 @@ onUnmounted(() => {
   >
     <div
       class="absolute inset-0 z-0 opacity-40 pointer-events-none grid-bg"
-    ></div>
+    />
 
     <div
       class="absolute inset-0 z-0 pointer-events-none"
       :style="{
         background: `radial-gradient(600px circle at ${x}px ${y}px, rgba(56, 224, 123, 0.15), transparent 40%)`,
       }"
-    ></div>
+    />
 
     <div class="z-10 flex flex-col items-center gap-8 relative">
       <div
@@ -59,7 +59,10 @@ onUnmounted(() => {
         <div
           class="w-24 h-24 rounded-full bg-black/40 flex items-center justify-center border border-white/10 shadow-[0_0_50px_rgba(56,224,123,0.2)] backdrop-blur-md"
         >
-          <UIcon name="i-simple-icons-spotify" class="w-14 h-14 text-primary" />
+          <UIcon
+            name="i-simple-icons-spotify"
+            class="w-14 h-14 text-primary"
+          />
         </div>
 
         <h1

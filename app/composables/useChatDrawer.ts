@@ -1,5 +1,5 @@
 export const useChatDrawer = () => {
-  const isOpen = useState<boolean>("chat-drawer-open", () => false);
+  const isOpen = useState<boolean>('chat-drawer-open', () => false);
 
   const toggle = () => {
     isOpen.value = !isOpen.value;

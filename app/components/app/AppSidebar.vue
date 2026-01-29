@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { iconButton } from "~/binds/buttons";
+import { ref, computed } from 'vue';
+import { iconButton } from '~/binds/buttons';
 
 const props = defineProps<{
   hideFilters?: boolean;
@@ -17,16 +17,16 @@ const accordionItems = computed(() => {
 
   if (!props.hideFilters) {
     items.push({
-      label: "Filtros",
-      icon: "i-heroicons-adjustments-horizontal",
-      slot: "filters",
+      label: 'Filtros',
+      icon: 'i-heroicons-adjustments-horizontal',
+      slot: 'filters',
     });
   }
 
   items.push({
-    label: "Sua Biblioteca",
-    icon: "i-heroicons-book-open",
-    slot: "playlists",
+    label: 'Sua Biblioteca',
+    icon: 'i-heroicons-book-open',
+    slot: 'playlists',
   });
 
   return items;
@@ -62,7 +62,7 @@ const accordionItems = computed(() => {
           }"
           multiple
         >
-          <template #filters class="bg-red">
+          <template #filters>
             <SidebarFilter />
           </template>
 

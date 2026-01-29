@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ghostButton, destructiveButton, iconButton } from "~/binds/buttons";
-import { baseDropdown } from "~/binds/dropdown";
-import { baseTooltip } from "~/binds/tooltips";
+import { ghostButton, destructiveButton, iconButton } from '~/binds/buttons';
+import { baseDropdown } from '~/binds/dropdown';
+import { baseTooltip } from '~/binds/tooltips';
 
 const route = useRoute();
 const playlistId = route.params.id;
@@ -9,52 +9,52 @@ const isDeleteModalOpen = ref(false);
 const isShuffleActive = ref(false);
 
 definePageMeta({
-  layout: "playlist",
+  layout: 'playlist',
 });
 
 const playlist = computed(() => {
   return {
     id: playlistId,
-    name: "Músicas Curtidas",
-    description: "Playlist • 142 músicas",
-    cover: "bg-gradient-to-br from-indigo-500 to-purple-600",
-    icon: "i-heroicons-heart-solid",
-    dominantColor: "#4f46e5",
+    name: 'Músicas Curtidas',
+    description: 'Playlist • 142 músicas',
+    cover: 'bg-gradient-to-br from-indigo-500 to-purple-600',
+    icon: 'i-heroicons-heart-solid',
+    dominantColor: '#4f46e5',
   };
 });
 
 const tracks = ref([
   {
     id: 1,
-    title: "Nightmare",
-    artist: "Avenged Sevenfold",
-    album: "Nightmare",
-    duration: "6:15",
-    addedAt: "2 days ago",
+    title: 'Nightmare',
+    artist: 'Avenged Sevenfold',
+    album: 'Nightmare',
+    duration: '6:15',
+    addedAt: '2 days ago',
   },
   {
     id: 2,
-    title: "Afterlife",
-    artist: "Avenged Sevenfold",
-    album: "Avenged Sevenfold",
-    duration: "5:52",
-    addedAt: "5 days ago",
+    title: 'Afterlife',
+    artist: 'Avenged Sevenfold',
+    album: 'Avenged Sevenfold',
+    duration: '5:52',
+    addedAt: '5 days ago',
   },
   {
     id: 3,
-    title: "Psychosocial",
-    artist: "Slipknot",
-    album: "All Hope Is Gone",
-    duration: "4:43",
-    addedAt: "1 week ago",
+    title: 'Psychosocial',
+    artist: 'Slipknot',
+    album: 'All Hope Is Gone',
+    duration: '4:43',
+    addedAt: '1 week ago',
   },
   {
     id: 4,
     title: "Tears Don't Fall",
-    artist: "Bullet For My Valentine",
-    album: "The Poison",
-    duration: "5:48",
-    addedAt: "2 weeks ago",
+    artist: 'Bullet For My Valentine',
+    album: 'The Poison',
+    duration: '5:48',
+    addedAt: '2 weeks ago',
   },
 ]);
 
@@ -63,19 +63,19 @@ const actionItems = computed(() => {
 
   return [
     {
-      label: "Integrar ao Spotify",
-      icon: "i-simple-icons-spotify",
+      label: 'Integrar ao Spotify',
+      icon: 'i-simple-icons-spotify',
       onSelect: () => {
-        console.log("Integate");
+        console.log('Integate');
       },
     },
     {
-      label: "Deletar",
-      icon: "i-heroicons-trash",
+      label: 'Deletar',
+      icon: 'i-heroicons-trash',
       disabled: isDefaultPlaylist,
       onSelect: () => (isDeleteModalOpen.value = true),
       tooltip: isDefaultPlaylist
-        ? "Você não pode deletar sua playlist de músicas curtidas"
+        ? 'Você não pode deletar sua playlist de músicas curtidas'
         : undefined,
     },
   ];
@@ -94,8 +94,8 @@ const actionItems = computed(() => {
         v-bind="iconButton"
         icon="i-heroicons-chevron-left"
         class="bg-black/40 hover:bg-black/60 backdrop-blur-md"
-        @click="$router.back()"
         title="Voltar"
+        @click="$router.back()"
       />
     </div>
 
@@ -167,7 +167,7 @@ const actionItems = computed(() => {
           <div
             v-if="isShuffleActive"
             class="absolute bottom-0 w-1 h-1 bg-primary rounded-full"
-          ></div>
+          />
         </UButton>
 
         <UDropdownMenu :items="actionItems" v-bind="baseDropdown">
