@@ -1,0 +1,159 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import { primaryButton } from "~/binds/buttons";
+import { baseTooltip } from "~/binds/tooltips";
+
+interface Filters {
+  energy: number;
+  danceability: number;
+  valence: number;
+  speechiness: number;
+  acousticness: number;
+  instrumentalness: number;
+  explicit: boolean;
+  popular: boolean;
+  decade: string;
+}
+
+const filters = ref<Filters>({
+  energy: 50,
+  danceability: 50,
+  valence: 50,
+  speechiness: 50,
+  acousticness: 50,
+  instrumentalness: 50,
+  explicit: false,
+  popular: false,
+  decade: "2020s",
+});
+
+const decadeOptions = [
+  "2020s",
+  "2010s",
+  "2000s",
+  "1990s",
+  "1980s",
+  "1970s",
+  "1960s",
+  "1950s",
+  "1940s",
+  "1930s",
+  "1920s",
+];
+
+const sliderLabels = {
+  energy: "Energia",
+  danceability: "Dançabilidade",
+  valence: "Valência",
+  speechiness: "Vocalidade",
+  acousticness: "Acusticidade",
+  instrumentalness: "Instrumentalidade",
+};
+
+type FilterKey = keyof typeof sliderLabels;
+
+const tooltips: Record<string, string> = {
+  energy: "Medida de intensidade e atividade.",
+  danceability: "O quão adequada a faixa é para dançar.",
+  valence: "Positividade musical transmitida pela faixa.",
+  speechiness: "Presença de palavras faladas na faixa.",
+  acousticness: "Confiança se a faixa é acústica.",
+  instrumentalness: "Prevê se a faixa não contém vocais.",
+};
+</script>
+
+<template>
+  <div class="px-2 space-y-6">
+    <div v-for="(label, key) in sliderLabels" :key="key" class="space-y-2">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-1">
+          <span class="text-sm font-medium text-text-muted">{{ label }}</span>
+          <UTooltip :text="tooltips[key]" v-bind="baseTooltip">
+            <UIcon
+              name="i-heroicons-information-circle"
+              class="w-4 h-4 text-text-dim hover:text-text-main cursor-help"
+            />
+          </UTooltip>
+        </div>
+
+        <span class="text-xs font-mono text-(--color-primary)"
+          >{{ filters[key as FilterKey] }}%</span
+        >
+      </div>
+
+      <USlider
+        v-model="filters[key as FilterKey]"
+        :min="0"
+        :max="100"
+        size="sm"
+        :ui="{
+          track: 'bg-surface-input',
+          range: 'bg-(--color-primary)',
+          thumb: 'bg-white ring-2 ring-(--color-primary)',
+        }"
+      />
+    </div>
+
+    <div class="space-y-3 pt-2">
+      <UTooltip
+        text="Permitir conteúdo explícito"
+        v-bind="baseTooltip"
+        class="w-full"
+      >
+        <UCheckbox
+          v-model="filters.explicit"
+          label="Explícito"
+          color="primary"
+          class="border-border"
+          :ui="{
+            root: 'flex flex-row-reverse justify-between w-full items-center',
+            label: 'text-sm font-medium text-text-muted',
+            wrapper: 'ms-0',
+          }"
+        />
+      </UTooltip>
+      <UTooltip
+        text="Filtrar por popularidade"
+        v-bind="baseTooltip"
+        class="w-full"
+      >
+        <UCheckbox
+          v-model="filters.popular"
+          label="Popular"
+          color="primary"
+          class="border-border"
+          :ui="{
+            root: 'flex flex-row-reverse justify-between w-full items-center',
+            label: 'text-sm font-medium text-text-muted',
+            wrapper: 'ms-0',
+          }"
+        />
+      </UTooltip>
+    </div>
+
+    <div class="space-y-2">
+      <label class="text-sm font-medium text-text-muted">Década</label>
+
+      <UTooltip text="Selecione a década" v-bind="baseTooltip" class="w-full">
+        <USelectMenu
+          v-model="filters.decade"
+          :items="decadeOptions"
+          variant="none"
+          class="w-full flex items-center justify-between h-9 px-3 rounded-md bg-white/5 text-text-main border border-white/10 shadow-sm ring-0 hover:bg-white/10 focus:ring-1 focus:ring-primary transition-colors text-sm"
+          :ui="{
+            content:
+              'bg-surface-elevated border-border ring-border min-w-[var(--reka-popper-anchor-width)]',
+            item: 'text-text-main hover:bg-surface-highlight data-[highlighted]:bg-surface-highlight',
+          }"
+        />
+      </UTooltip>
+    </div>
+
+    <UButton
+      v-bind="primaryButton"
+      label="Gerar recomendação"
+      block
+      class="mt-4 font-bold text-black"
+    />
+  </div>
+</template>

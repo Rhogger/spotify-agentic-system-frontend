@@ -6,6 +6,13 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
+  components: [
+    {
+      path: "~/components",
+      pathPrefix: false,
+    },
+  ],
+
   css: ["~/assets/css/main.css"],
 
   routeRules: {
@@ -21,6 +28,15 @@ export default defineNuxtConfig({
         braceStyle: "1tbs",
       },
     },
+  },
+
+  icon: {
+    customCollections: [
+      {
+        prefix: "images",
+        dir: "./app/assets/images",
+      },
+    ],
   },
 
   colorMode: {

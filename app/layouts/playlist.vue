@@ -7,13 +7,13 @@
     <AppHeader />
 
     <div class="flex flex-1 overflow-hidden relative">
-      <AppSidebar />
+      <AppSidebar hide-filters />
 
-      <AppMain>
+      <main
+        class="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-background"
+      >
         <slot />
-      </AppMain>
-
-      <AppDrawer />
+      </main>
     </div>
 
     <AppPlayer />
