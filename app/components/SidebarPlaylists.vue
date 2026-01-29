@@ -2,52 +2,26 @@
 import { ref } from 'vue';
 import { primaryButton } from '~/binds/buttons';
 import { dashedCard } from '~/binds/cards';
+import { usePlaylists } from '~/composables/usePlaylists';
 
+const { playlists } = usePlaylists();
 const isModalOpen = ref(false);
 const newPlaylistName = ref('');
 const addRecommendations = ref(false);
 
-const playlists = ref([
-  {
-    id: 1,
-    name: 'Músicas Curtidas',
-    count: '142 músicas',
-    type: 'Playlist',
-    icon: 'i-heroicons-heart',
-    gradient: 'bg-gradient-to-br from-indigo-500 to-purple-600',
-  },
-  {
-    id: 2,
-    name: 'Mix para Dirigir',
-    count: '45 músicas',
-    type: 'Playlist',
-    icon: 'i-heroicons-musical-note',
-    color: 'bg-[#282828]',
-  },
-  {
-    id: 3,
-    name: 'Treino Pesado',
-    count: '28 músicas',
-    type: 'Playlist',
-    icon: 'i-heroicons-musical-note',
-    color: 'bg-[#282828]',
-  },
-  {
-    id: 4,
-    name: 'Vibe Tranquila',
-    count: '62 músicas',
-    type: 'Playlist',
-    icon: 'i-heroicons-musical-note',
-    color: 'bg-[#282828]',
-  },
-]);
-
 function handleCreatePlaylist() {
-  console.log(
-    'Creating playlist:',
-    newPlaylistName.value,
-    addRecommendations.value,
-  );
+  if (!newPlaylistName.value.trim()) return;
+
+  const newId = playlists.value.length + 1;
+  playlists.value.push({
+    id: newId,
+    name: newPlaylistName.value,
+    count: '0 músicas',
+    type: 'Playlist',
+    icon: 'i-heroicons-musical-note',
+    color: 'bg-[#282828]',
+  });
+
   isModalOpen.value = false;
   newPlaylistName.value = '';
   addRecommendations.value = false;
@@ -75,7 +49,8 @@ function handleCreatePlaylist() {
         </div>
         <span
           class="font-medium text-text-muted group-hover:text-white transition-colors"
-        >Criar Playlist</span>
+          >Criar Playlist</span
+        >
       </UCard>
 
       <PlaylistCard

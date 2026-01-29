@@ -1,19 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { Filters } from '~/models/filters';
 import { primaryButton } from '~/binds/buttons';
 import { baseTooltip } from '~/binds/tooltips';
-
-interface Filters {
-  energy: number;
-  danceability: number;
-  valence: number;
-  speechiness: number;
-  acousticness: number;
-  instrumentalness: number;
-  explicit: boolean;
-  popular: boolean;
-  decade: string;
-}
 
 const filters = ref<Filters>({
   energy: 50,
@@ -64,18 +53,11 @@ const tooltips: Record<string, string> = {
 
 <template>
   <div class="px-2 space-y-6">
-    <div
-      v-for="(label, key) in sliderLabels"
-      :key="key"
-      class="space-y-2"
-    >
+    <div v-for="(label, key) in sliderLabels" :key="key" class="space-y-2">
       <div class="flex justify-between items-center">
         <div class="flex items-center gap-1">
           <span class="text-sm font-medium text-text-muted">{{ label }}</span>
-          <UTooltip
-            :text="tooltips[key]"
-            v-bind="baseTooltip"
-          >
+          <UTooltip :text="tooltips[key]" v-bind="baseTooltip">
             <UIcon
               name="i-heroicons-information-circle"
               class="w-4 h-4 text-text-dim hover:text-text-main cursor-help"
@@ -83,7 +65,9 @@ const tooltips: Record<string, string> = {
           </UTooltip>
         </div>
 
-        <span class="text-xs font-mono text-(--color-primary)">{{ filters[key as FilterKey] }}%</span>
+        <span class="text-xs font-mono text-(--color-primary)"
+          >{{ filters[key as FilterKey] }}%</span
+        >
       </div>
 
       <USlider
@@ -138,11 +122,7 @@ const tooltips: Record<string, string> = {
     <div class="space-y-2">
       <label class="text-sm font-medium text-text-muted">Década</label>
 
-      <UTooltip
-        text="Selecione a década"
-        v-bind="baseTooltip"
-        class="w-full"
-      >
+      <UTooltip text="Selecione a década" v-bind="baseTooltip" class="w-full">
         <USelectMenu
           v-model="filters.decade"
           :items="decadeOptions"

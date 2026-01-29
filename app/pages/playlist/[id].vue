@@ -50,7 +50,7 @@ const tracks = ref([
   },
   {
     id: 4,
-    title: "Tears Don't Fall",
+    title: 'Tears Don\'t Fall',
     artist: 'Bullet For My Valentine',
     album: 'The Poison',
     duration: '5:48',
@@ -110,7 +110,10 @@ const actionItems = computed(() => {
           class="w-20 h-20 text-white drop-shadow-md"
         />
 
-        <span v-else class="text-6xl font-black text-white">
+        <span
+          v-else
+          class="text-6xl font-black text-white"
+        >
           {{ playlist.name[0] }}
         </span>
       </div>
@@ -162,7 +165,10 @@ const actionItems = computed(() => {
           title="Ordem Aleatória"
           @click="isShuffleActive = !isShuffleActive"
         >
-          <UIcon name="i-lucide-shuffle" class="w-6 h-6" />
+          <UIcon
+            name="i-lucide-shuffle"
+            class="w-6 h-6"
+          />
 
           <div
             v-if="isShuffleActive"
@@ -170,7 +176,10 @@ const actionItems = computed(() => {
           />
         </UButton>
 
-        <UDropdownMenu :items="actionItems" v-bind="baseDropdown">
+        <UDropdownMenu
+          :items="actionItems"
+          v-bind="baseDropdown"
+        >
           <UButton
             v-bind="iconButton"
             icon="i-heroicons-ellipsis-horizontal"
@@ -189,7 +198,11 @@ const actionItems = computed(() => {
                 :class="{ 'opacity-50 cursor-not-allowed': item.disabled }"
               >
                 <div class="flex items-center gap-2">
-                  <UIcon v-if="item.icon" :name="item.icon" class="w-4 h-4" />
+                  <UIcon
+                    v-if="item.icon"
+                    :name="item.icon"
+                    class="w-4 h-4"
+                  />
                   <span class="truncate">{{ item.label }}</span>
                 </div>
               </div>
@@ -211,7 +224,10 @@ const actionItems = computed(() => {
           <span class="text-right pr-4">Adicionada em</span>
 
           <div class="flex justify-center w-12">
-            <UIcon name="i-heroicons-clock" class="w-5 h-5" />
+            <UIcon
+              name="i-heroicons-clock"
+              class="w-5 h-5"
+            />
           </div>
         </div>
 

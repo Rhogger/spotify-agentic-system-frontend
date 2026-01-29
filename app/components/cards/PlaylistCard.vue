@@ -1,18 +1,8 @@
 <script setup lang="ts">
+import type { Playlist } from '~/models/playlist';
 import { ghostCard } from '~/binds/cards';
 
-interface Props {
-  id: number | string;
-  name: string;
-  type: string;
-  count: string;
-  icon?: string;
-  color?: string;
-  gradient?: string;
-  active?: boolean;
-}
-
-defineProps<Props>();
+defineProps<Playlist>();
 </script>
 
 <template>

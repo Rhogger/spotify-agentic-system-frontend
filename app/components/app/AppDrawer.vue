@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import type { Message } from '~/models/message';
 import { iconButton } from '~/binds/buttons';
 import { useChatDrawer } from '~/composables/useChatDrawer';
 
 const { isOpen } = useChatDrawer();
-
-interface Message {
-  id: number | string;
-  role: 'user' | 'assistant';
-  content: string;
-}
 
 const messages = ref<Message[]>([
   {
@@ -64,15 +59,10 @@ function sendMessage() {
           <div
             class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary"
           >
-            <UIcon
-              name="i-lucide-bot"
-              class="w-6 h-6"
-            />
+            <UIcon name="i-lucide-bot" class="w-6 h-6" />
           </div>
 
-          <h3 class="text-lg font-bold text-text-main">
-            Assistente IA
-          </h3>
+          <h3 class="text-lg font-bold text-text-main">Assistente IA</h3>
         </div>
 
         <UButton
@@ -104,11 +94,9 @@ function sendMessage() {
                 artistas parecidos com seus favoritos.
               </p>
 
-              <br>
+              <br />
 
-              <p class="font-semibold mb-1">
-                Exemplos de prompts:
-              </p>
+              <p class="font-semibold mb-1">Exemplos de prompts:</p>
 
               <ul class="list-disc list-inside text-text-muted">
                 <li>"Músicas para relaxar"</li>
