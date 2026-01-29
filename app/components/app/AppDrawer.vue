@@ -1,42 +1,142 @@
 <script setup lang="ts">
-// AppDrawer Component (Right side - Agents/Chat)
+import { ref, computed } from "vue";
+import { iconButton } from "~/binds/buttons";
+import { useChatDrawer } from "~/composables/useChatDrawer";
+
+const { isOpen } = useChatDrawer();
+
+interface Message {
+  id: number | string;
+  role: "user" | "assistant";
+  content: string;
+}
+
+const messages = ref<Message[]>([
+  {
+    id: "welcome",
+    role: "assistant",
+    content: "Welcome Message",
+  },
+]);
+
+const inputValue = ref("");
+const isLoading = ref(false);
+const status = computed(() => (isLoading.value ? "streaming" : "ready"));
+
+function sendMessage() {
+  if (!inputValue.value.trim() || isLoading.value) return;
+
+  messages.value.push({
+    id: Date.now(),
+    role: "user",
+    content: inputValue.value,
+  });
+
+  const userText = inputValue.value;
+  inputValue.value = "";
+  isLoading.value = true;
+
+  setTimeout(() => {
+    messages.value.push({
+      id: Date.now() + 1,
+      role: "assistant",
+      content: `Entendi! Você disse: "${userText}". Em breve vou poder buscar recomendações reais pra você!`,
+    });
+    isLoading.value = false;
+  }, 1000);
+}
 </script>
 
 <template>
-  <aside
-    class="w-80 border-l border-border bg-surface-highlight overflow-y-auto hidden xl:flex flex-col shrink-0"
+  <USlideover
+    v-model:open="isOpen"
+    :ui="{
+      overlay: 'bg-black/60 backdrop-blur-sm',
+      content:
+        'bg-surface-base border-l border-border flex flex-col max-w-md w-full md:w-[40%] md:max-w-none',
+    }"
   >
-    <div
-      class="p-4 border-b border-border flex items-center justify-between bg-surface-base"
-    >
-      <h3 class="font-semibold text-text-main">Agent Activity</h3>
-      <UIcon name="i-heroicons-bolt" class="w-5 h-5 text-yellow-500" />
-    </div>
+    <template #content>
+      <div
+        class="flex items-center justify-between p-4 border-b border-border bg-surface-base/50 backdrop-blur-md sticky top-0 z-10"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary"
+          >
+            <UIcon name="i-lucide-bot" class="w-6 h-6" />
+          </div>
 
-    <div class="p-4 flex-1 text-text-main" id="chat-container">
-      <div class="bg-surface-card rounded-lg p-3 text-sm text-text-muted mb-3">
-        <p class="font-medium mb-1 text-xs text-(--color-primary)">System</p>
-        <p>Waiting for user input...</p>
-      </div>
-    </div>
-
-    <div class="p-4 border-t border-border bg-surface-base">
-      <div class="relative">
-        <UTextarea
-          placeholder="Ask the agent..."
-          :rows="3"
-          class="w-full bg-surface-input border-none text-text-main focus:ring-(--color-primary) placeholder-text-dim"
-          variant="none"
-        />
-        <div class="absolute bottom-2 right-2">
-          <UButton
-            icon="i-heroicons-paper-airplane"
-            size="xs"
-            color="primary"
-            variant="solid"
-          />
+          <h3 class="text-lg font-bold text-text-main">Assistente IA</h3>
         </div>
+
+        <UButton
+          v-bind="iconButton"
+          icon="i-heroicons-x-mark"
+          @click="isOpen = false"
+        />
       </div>
-    </div>
-  </aside>
+
+      <UChatPalette class="flex-1 flex flex-col min-h-0">
+        <UChatMessages
+          :messages="messages"
+          :user="{
+            variant: 'solid',
+            ui: { content: 'text-black' },
+          }"
+          :assistant="{
+            variant: 'soft',
+          }"
+        >
+          <template #content="{ message }">
+            <div
+              v-if="message.id === 'welcome'"
+              class="text-sm leading-relaxed"
+            >
+              <p>
+                Olá! Sou seu assistente musical. Posso ajudar a encontrar novas
+                músicas, criar playlists baseadas no seu humor ou sugerir
+                artistas parecidos com seus favoritos.
+              </p>
+
+              <br />
+
+              <p class="font-semibold mb-1">Exemplos de prompts:</p>
+
+              <ul class="list-disc list-inside text-text-muted">
+                <li>"Músicas para relaxar"</li>
+                <li>"Parecido com Daft Punk"</li>
+                <li>"Playlist para treino intenso"</li>
+              </ul>
+            </div>
+
+            <span v-else>
+              {{ message.content }}
+            </span>
+          </template>
+        </UChatMessages>
+
+        <template #prompt>
+          <UChatPrompt
+            v-model="inputValue"
+            :status="status"
+            placeholder="Peça uma recomendação..."
+            :ui="{
+              root: 'w-full flex items-end gap-2 p-1',
+              base: 'flex-1 text-text-main placeholder:text-text-dim border-none focus:ring-1 focus:ring-primary rounded-3xl px-5 py-3 custom-scrollbar resize-none max-h-32 min-h-[48px]',
+            }"
+            @submit="sendMessage"
+          >
+            <UChatPromptSubmit
+              :status="status"
+              color="primary"
+              variant="solid"
+              icon="i-lucide-send"
+              class="w-12 h-12 shrink-0 flex items-center justify-center text-black shadow-lg hover:scale-105 transition-transform rounded-2xl"
+            />
+          </UChatPrompt>
+        </template>
+      </UChatPalette>
+    </template>
+  </USlideover>
 </template>

@@ -17,6 +17,7 @@
     </div>
 
     <AppPlayer />
-    <ChatDrawer />
+    <AppDrawer />
+    <AppChatFab />
   </div>
 </template>

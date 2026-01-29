@@ -1,9 +1,5 @@
 <script setup lang="ts">
 import { baseDropdown } from "~/binds/dropdown";
-import { useChatDrawer } from "~/composables/useChatDrawer";
-import { iconButton } from "~/binds/buttons";
-
-const { toggle: toggleChat } = useChatDrawer();
 
 const items = [
   [
@@ -39,12 +35,6 @@ const items = [
     </div>
 
     <div class="ml-auto flex items-center gap-2">
-      <UButton
-        v-bind="iconButton"
-        icon="i-heroicons-chat-bubble-left-right"
-        @click="toggleChat"
-      />
-
       <UDropdownMenu
         :items="items"
         v-bind="baseDropdown"

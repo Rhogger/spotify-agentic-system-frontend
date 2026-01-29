@@ -12,11 +12,10 @@
       <AppMain>
         <slot />
       </AppMain>
-
-      <AppDrawer />
     </div>
 
     <AppPlayer />
-    <ChatDrawer />
+    <AppDrawer />
+    <AppChatFab />
   </div>
 </template>
