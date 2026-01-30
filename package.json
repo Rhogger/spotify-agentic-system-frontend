@@ -14,10 +14,13 @@
     "@iconify-json/lucide": "^1.2.82",
     "@iconify-json/simple-icons": "^1.2.63",
     "@nuxt/ui": "^4.3.0",
+    "axios": "^1.13.4",
     "nuxt": "^4.2.2"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.12.1",
+    "@types/node": "^25.1.0",
+    "@types/spotify-web-playback-sdk": "^0.1.19",
     "eslint": "^9.39.2",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.2.1"
