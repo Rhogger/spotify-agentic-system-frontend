@@ -1,21 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { Filters } from '~/models/filters';
 import { primaryButton } from '~/binds/buttons';
-import { baseTooltip } from '~/binds/tooltips';
 import InfoButton from '~/components/buttons/InfoButton.vue';
+import { useFilters } from '~/composables/useFilters';
 
-const filters = ref<Filters>({
-  energy: 50,
-  danceability: 50,
-  valence: 50,
-  speechiness: 50,
-  acousticness: 50,
-  instrumentalness: 50,
-  explicit: false,
-  popular: false,
-  decade: '2020s',
-});
+const { filters } = useFilters();
 
 const decadeOptions = [
   '2020s',
@@ -71,10 +59,11 @@ const tooltips: Record<string, string> = {
         :min="0"
         :max="100"
         size="sm"
+        class="cursor-pointer"
         :ui="{
-          track: 'bg-surface-input',
+          track: 'bg-surface-input cursor-pointer',
           range: 'bg-(--color-primary)',
-          thumb: 'bg-white ring-2 ring-(--color-primary)',
+          thumb: 'bg-white ring-2 ring-(--color-primary) cursor-pointer',
         }"
       />
     </div>
@@ -82,15 +71,15 @@ const tooltips: Record<string, string> = {
     <UCheckbox
       v-model="filters.explicit"
       color="primary"
-      class="border-border"
+      class="border-border cursor-pointer"
       :ui="{
         root: 'flex flex-row-reverse justify-between w-full items-center',
-        label: 'text-sm font-medium text-text-muted',
+        label: 'text-sm font-medium text-text-muted cursor-pointer',
         wrapper: 'ms-0',
       }"
     >
       <template #label>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 cursor-pointer">
           <span class="text-sm font-medium text-text-muted">Explícito</span>
           <InfoButton text="Permitir músicas com conteúdo explícito" />
         </div>
@@ -100,15 +89,15 @@ const tooltips: Record<string, string> = {
     <UCheckbox
       v-model="filters.popular"
       color="primary"
-      class="border-border"
+      class="border-border cursor-pointer"
       :ui="{
         root: 'flex flex-row-reverse justify-between w-full items-center',
-        label: 'text-sm font-medium text-text-muted',
+        label: 'text-sm font-medium text-text-muted cursor-pointer',
         wrapper: 'ms-0',
       }"
     >
       <template #label>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 cursor-pointer">
           <span class="text-sm font-medium text-text-muted">Popular</span>
           <InfoButton text="Buscar apenas músicas populares" />
         </div>
@@ -125,11 +114,11 @@ const tooltips: Record<string, string> = {
         v-model="filters.decade"
         :items="decadeOptions"
         variant="none"
-        class="w-full flex items-center justify-between h-9 px-3 rounded-md bg-white/5 text-text-main border border-white/10 shadow-sm ring-0 hover:bg-white/10 focus:ring-1 focus:ring-primary transition-colors text-sm"
+        class="w-full flex items-center justify-between h-9 px-3 rounded-md bg-white/5 text-text-main border border-white/10 shadow-sm ring-0 hover:bg-white/10 focus:ring-1 focus:ring-primary transition-colors text-sm cursor-pointer"
         :ui="{
           content:
             'bg-surface-elevated border-border ring-border min-w-[var(--reka-popper-anchor-width)]',
-          item: 'text-text-main hover:bg-surface-highlight data-[highlighted]:bg-surface-highlight',
+          item: 'text-text-main hover:bg-surface-highlight data-[highlighted]:bg-surface-highlight cursor-pointer',
         }"
       />
     </div>

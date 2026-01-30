@@ -52,10 +52,7 @@ const accordionItems = computed(() => {
         />
       </div>
 
-      <div
-        v-if="!isCollapsed"
-        class="flex-1 flex flex-col min-h-0"
-      >
+      <div v-show="!isCollapsed" class="flex-1 flex flex-col min-h-0">
         <UAccordion
           :items="accordionItems"
           :ui="{

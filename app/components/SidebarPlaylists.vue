@@ -35,6 +35,7 @@ function handleCreatePlaylist() {
         v-bind="dashedCard"
         tabindex="0"
         role="button"
+        class="cursor-pointer"
         @click="isModalOpen = true"
         @keydown.enter="isModalOpen = true"
         @keydown.space.prevent="isModalOpen = true"
@@ -87,7 +88,11 @@ function handleCreatePlaylist() {
           v-model="addRecommendations"
           label="Adicionar músicas recomendadas"
           color="primary"
-          :ui="{ label: 'text-text-main' }"
+          class="cursor-pointer"
+          :ui="{
+            label: 'text-text-main cursor-pointer',
+            base: 'cursor-pointer',
+          }"
         />
       </div>
 
