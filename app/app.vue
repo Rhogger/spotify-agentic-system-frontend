@@ -6,6 +6,8 @@ useHead({
   },
 });
 
+import { useAuth } from '~/composables/useAuth';
+
 const title = 'Spotify Recs with Playlist Management V2';
 const description =
   'Spotify Agentic System - AI Powered Music Recommendations and Playlist Management';
@@ -16,6 +18,16 @@ useSeoMeta({
   ogTitle: title,
   ogDescription: description,
   twitterCard: 'summary_large_image',
+});
+
+const { fetchUser } = useAuth();
+
+const route = useRoute();
+
+onMounted(() => {
+  if (route.path !== '/') {
+    fetchUser();
+  }
 });
 </script>
 

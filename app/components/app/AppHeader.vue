@@ -2,7 +2,7 @@
 import { baseDropdown } from '~/binds/dropdown';
 import { useAuth } from '~/composables/useAuth';
 
-const { user, logout } = useAuth();
+const { user, logout, isLoading } = useAuth();
 
 const profileUrl = computed(
   () =>
@@ -26,7 +26,7 @@ const items = computed(() => [
     {
       label: 'Sair',
       icon: 'i-heroicons-arrow-left-on-rectangle',
-      click: logout,
+      onSelect: logout,
     },
   ],
 ]);
@@ -48,7 +48,12 @@ const items = computed(() => [
     </div>
 
     <div class="ml-auto flex items-center gap-2">
+      <template v-if="isLoading && !user">
+        <USkeleton class="h-8 w-8 rounded-full bg-surface-elevated" />
+      </template>
+
       <UDropdownMenu
+        v-else
         :items="items"
         v-bind="baseDropdown"
         :content="{ align: 'end', side: 'bottom' }"
