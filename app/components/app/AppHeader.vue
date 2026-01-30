@@ -36,7 +36,10 @@ const items = computed(() => [
   <header
     class="h-16 shrink-0 border-b border-border flex items-center px-4 bg-background/75 backdrop-blur-md z-20"
   >
-    <div class="flex items-center gap-2">
+    <div
+      class="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
+      @click="navigateTo('/home')"
+    >
       <UIcon
         name="i-images-spotify-logo"
         class="w-8 h-8 text-(--color-primary)"
