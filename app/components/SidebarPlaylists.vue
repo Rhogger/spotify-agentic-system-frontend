@@ -4,10 +4,14 @@ import { primaryButton } from '~/binds/buttons';
 import { dashedCard } from '~/binds/cards';
 import { usePlaylists } from '~/composables/usePlaylists';
 
-const { playlists } = usePlaylists();
+const { playlists, fetchPlaylists } = usePlaylists();
 const isModalOpen = ref(false);
 const newPlaylistName = ref('');
 const addRecommendations = ref(false);
+
+onMounted(() => {
+  fetchPlaylists();
+});
 
 function handleCreatePlaylist() {
   if (!newPlaylistName.value.trim()) return;
