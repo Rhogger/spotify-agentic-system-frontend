@@ -1,11 +1,24 @@
 <script setup lang="ts">
 import { baseDropdown } from '~/binds/dropdown';
+import { useAuth } from '~/composables/useAuth';
 
-const items = [
+const { user, logout } = useAuth();
+
+const profileUrl = computed(
+  () =>
+    user.value?.spotify_profile?.external_urls?.spotify ||
+    'https://www.spotify.com/account/overview/',
+);
+
+const avatarUrl = computed(() => user.value?.spotify_profile?.images?.[0]?.url);
+
+const displayName = computed(() => user.value?.display_name || 'User');
+
+const items = computed(() => [
   [
     {
       label: 'Meu Perfil',
-      to: 'https://www.spotify.com/account/overview/',
+      to: profileUrl.value,
       target: '_blank',
     },
   ],
@@ -13,10 +26,10 @@ const items = [
     {
       label: 'Sair',
       icon: 'i-heroicons-arrow-left-on-rectangle',
-      to: 'http://localhost:3001/',
+      click: logout,
     },
   ],
-];
+]);
 </script>
 
 <template>
@@ -41,8 +54,8 @@ const items = [
         :content="{ align: 'end', side: 'bottom' }"
       >
         <UserAvatar
-          src="https://avatars.githubusercontent.com/u/83069922?v=4&size=64"
-          alt="User"
+          :src="avatarUrl"
+          :alt="displayName"
           size="sm"
           class="cursor-pointer ring-2 ring-(--color-primary) hover:ring-opacity-80 transition-all"
         />

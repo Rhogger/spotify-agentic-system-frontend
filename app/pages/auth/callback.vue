@@ -1,14 +1,17 @@
 <script setup lang="ts">
+import { useAuth } from '~/composables/useAuth';
+
 definePageMeta({
   layout: 'public',
 });
 
 const route = useRoute();
+const { setToken, fetchUser } = useAuth();
 
 const processing = ref(true);
 const error = ref<string | null>(null);
 
-onMounted(() => {
+onMounted(async () => {
   const token = route.query.token as string;
   const refresh = route.query.refresh as string;
   const errorParam = route.query.error as string;
@@ -36,14 +39,15 @@ onMounted(() => {
       refreshTokenCookie.value = refresh;
     }
 
-    useState('spotify-token').value = token;
+    setToken(token);
+    await fetchUser(token);
 
     setTimeout(() => {
       navigateTo('/home');
     }, 1000);
   } catch (e) {
     console.error('Callback error:', e);
-    error.value = 'Falha ao salvar o token.';
+    error.value = 'Falha ao processar login.';
   } finally {
     processing.value = false;
   }
