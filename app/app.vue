@@ -7,8 +7,8 @@ useHead({
 });
 
 const title = 'Spotify Recs with Playlist Management V2';
-const description
-  = 'Spotify Agentic System - AI Powered Music Recommendations and Playlist Management';
+const description =
+  'Spotify Agentic System - AI Powered Music Recommendations and Playlist Management';
 
 useSeoMeta({
   title,
