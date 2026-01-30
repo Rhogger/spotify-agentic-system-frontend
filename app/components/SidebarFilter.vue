@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import type { Filters } from '~/models/filters';
 import { primaryButton } from '~/binds/buttons';
 import { baseTooltip } from '~/binds/tooltips';
+import InfoButton from '~/components/buttons/InfoButton.vue';
 
 const filters = ref<Filters>({
   energy: 50,
@@ -57,12 +58,7 @@ const tooltips: Record<string, string> = {
       <div class="flex justify-between items-center">
         <div class="flex items-center gap-1">
           <span class="text-sm font-medium text-text-muted">{{ label }}</span>
-          <UTooltip :text="tooltips[key]" v-bind="baseTooltip">
-            <UIcon
-              name="i-heroicons-information-circle"
-              class="w-4 h-4 text-text-dim hover:text-text-main cursor-help"
-            />
-          </UTooltip>
+          <InfoButton :text="tooltips[key] ?? ''" />
         </div>
 
         <span class="text-xs font-mono text-(--color-primary)"
@@ -83,58 +79,59 @@ const tooltips: Record<string, string> = {
       />
     </div>
 
-    <UTooltip
-      text="Permitir conteúdo explícito"
-      v-bind="baseTooltip"
-      class="w-full"
+    <UCheckbox
+      v-model="filters.explicit"
+      color="primary"
+      class="border-border"
+      :ui="{
+        root: 'flex flex-row-reverse justify-between w-full items-center',
+        label: 'text-sm font-medium text-text-muted',
+        wrapper: 'ms-0',
+      }"
     >
-      <UCheckbox
-        v-model="filters.explicit"
-        label="Explícito"
-        color="primary"
-        class="border-border"
-        :ui="{
-          root: 'flex flex-row-reverse justify-between w-full items-center',
-          label: 'text-sm font-medium text-text-muted',
-          wrapper: 'ms-0',
-        }"
-      />
-    </UTooltip>
+      <template #label>
+        <div class="flex items-center gap-1">
+          <span class="text-sm font-medium text-text-muted">Explícito</span>
+          <InfoButton text="Permitir músicas com conteúdo explícito" />
+        </div>
+      </template>
+    </UCheckbox>
 
-    <UTooltip
-      text="Filtrar por popularidade"
-      v-bind="baseTooltip"
-      class="w-full"
+    <UCheckbox
+      v-model="filters.popular"
+      color="primary"
+      class="border-border"
+      :ui="{
+        root: 'flex flex-row-reverse justify-between w-full items-center',
+        label: 'text-sm font-medium text-text-muted',
+        wrapper: 'ms-0',
+      }"
     >
-      <UCheckbox
-        v-model="filters.popular"
-        label="Popular"
-        color="primary"
-        class="border-border"
-        :ui="{
-          root: 'flex flex-row-reverse justify-between w-full items-center',
-          label: 'text-sm font-medium text-text-muted',
-          wrapper: 'ms-0',
-        }"
-      />
-    </UTooltip>
+      <template #label>
+        <div class="flex items-center gap-1">
+          <span class="text-sm font-medium text-text-muted">Popular</span>
+          <InfoButton text="Buscar apenas músicas populares" />
+        </div>
+      </template>
+    </UCheckbox>
 
     <div class="space-y-2">
-      <label class="text-sm font-medium text-text-muted">Década</label>
+      <div class="flex items-center gap-1">
+        <label class="text-sm font-medium text-text-muted">Década</label>
+        <InfoButton text="Filtrar recomendações por década de lançamento" />
+      </div>
 
-      <UTooltip text="Selecione a década" v-bind="baseTooltip" class="w-full">
-        <USelectMenu
-          v-model="filters.decade"
-          :items="decadeOptions"
-          variant="none"
-          class="w-full flex items-center justify-between h-9 px-3 rounded-md bg-white/5 text-text-main border border-white/10 shadow-sm ring-0 hover:bg-white/10 focus:ring-1 focus:ring-primary transition-colors text-sm"
-          :ui="{
-            content:
-              'bg-surface-elevated border-border ring-border min-w-[var(--reka-popper-anchor-width)]',
-            item: 'text-text-main hover:bg-surface-highlight data-[highlighted]:bg-surface-highlight',
-          }"
-        />
-      </UTooltip>
+      <USelectMenu
+        v-model="filters.decade"
+        :items="decadeOptions"
+        variant="none"
+        class="w-full flex items-center justify-between h-9 px-3 rounded-md bg-white/5 text-text-main border border-white/10 shadow-sm ring-0 hover:bg-white/10 focus:ring-1 focus:ring-primary transition-colors text-sm"
+        :ui="{
+          content:
+            'bg-surface-elevated border-border ring-border min-w-[var(--reka-popper-anchor-width)]',
+          item: 'text-text-main hover:bg-surface-highlight data-[highlighted]:bg-surface-highlight',
+        }"
+      />
     </div>
 
     <UButton

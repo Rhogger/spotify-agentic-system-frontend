@@ -16,12 +16,16 @@ defineProps<Playlist>();
   >
     <div
       class="w-12 h-12 rounded flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105"
-      :class="gradient || color || 'bg-surface-elevated'"
+      :class="
+        gradient ||
+        color ||
+        'bg-green-950/30 backdrop-blur-md border border-white/5'
+      "
     >
       <UIcon
         v-if="icon"
         :name="icon"
-        class="text-white w-6 h-6 drop-shadow-sm"
+        class="text-primary w-6 h-6 drop-shadow-sm"
         :class="{ 'fill-current': name === 'Músicas Curtidas' }"
       />
     </div>

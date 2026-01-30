@@ -120,7 +120,7 @@ function toggleSong(id: number) {
 <template>
   <UPage class="h-full overflow-y-auto custom-scrollbar">
     <UPageBody class="p-8">
-      <div v-if="recommendations.length == 0">
+      <div v-if="recommendations.length > 0">
         <div
           class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4"
         >
@@ -178,7 +178,7 @@ function toggleSong(id: number) {
           ></div>
 
           <div
-            class="relative w-32 h-32 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 backdrop-blur-md flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.3)] group hover:scale-110 transition-transform duration-500"
+            class="relative w-32 h-32 rounded-full bg-linear-to-br from-white/10 to-transparent border border-white/20 backdrop-blur-md flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.3)] group hover:scale-110 transition-transform duration-500"
           >
             <UIcon
               name="i-heroicons-sparkles"
