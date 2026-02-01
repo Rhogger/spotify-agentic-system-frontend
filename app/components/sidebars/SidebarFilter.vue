@@ -52,17 +52,11 @@ const tooltips: Record<string, string> = {
         >
       </div>
 
-      <USlider
+      <BaseSlider
         v-model="filters[key as FilterKey]"
         :min="0"
         :max="100"
         size="sm"
-        class="cursor-pointer"
-        :ui="{
-          track: 'bg-surface-input cursor-pointer',
-          range: 'bg-(--color-primary)',
-          thumb: 'bg-white ring-2 ring-(--color-primary) cursor-pointer',
-        }"
       />
     </div>
 

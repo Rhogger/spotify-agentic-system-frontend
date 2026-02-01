@@ -7,24 +7,25 @@ const props = defineProps<{
   playlist: Playlist;
   isFollowing: boolean;
   isFollowingLoading: boolean;
-  isShuffleActive: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: 'toggle-shuffle'): void;
   (e: 'follow'): void;
   (e: 'unfollow'): void;
-  (e: 'play'): void;
 }>();
+
+const { toggleShuffle, playerState } = useSpotifyPlayer();
+
+const isShuffleActive = computed(() => !!playerState.value?.shuffle);
+
+const handleToggleShuffle = async () => {
+  await toggleShuffle(!isShuffleActive.value);
+};
 </script>
 
 <template>
   <div class="px-6 py-6 flex items-center gap-4">
-    <PlayButton
-      size="xl"
-      :track-uri="`spotify:playlist:${playlist.id}`"
-      @click="emit('play')"
-    />
+    <PlayButton size="xl" :track-uri="`spotify:playlist:${playlist.id}`" />
 
     <UButton
       variant="ghost"
@@ -36,7 +37,7 @@ const emit = defineEmits<{
           : 'text-text-muted hover:text-white hover:bg-white/10',
       ]"
       title="Ordem Aleatória"
-      @click="emit('toggle-shuffle')"
+      @click="handleToggleShuffle"
     >
       <UIcon name="i-lucide-shuffle" class="w-6 h-6" />
 

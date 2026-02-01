@@ -19,6 +19,11 @@ export const useAuth = () => {
   const setUser = (newUser: User) => {
     user.value = newUser;
     userCookie.value = newUser;
+
+    if (newUser.spotify_access_token) {
+      const spotifyAccessCookie = useCookie('spotify_access_token');
+      spotifyAccessCookie.value = newUser.spotify_access_token;
+    }
   };
 
   const setToken = (newToken: string) => {

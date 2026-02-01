@@ -61,12 +61,25 @@ const items = computed(() => [
         v-bind="baseDropdown"
         :content="{ align: 'end', side: 'bottom' }"
       >
-        <UserAvatar
-          :src="avatarUrl"
-          :alt="displayName"
-          size="sm"
-          class="cursor-pointer ring-2 ring-(--color-primary) hover:ring-opacity-80 transition-all"
-        />
+        <div class="flex items-center gap-3">
+          <UBadge
+            v-if="user?.spotify_profile?.product"
+            :color="
+              user.spotify_profile.product === 'premium' ? 'primary' : 'neutral'
+            "
+            variant="subtle"
+            class="uppercase font-bold tracking-widest text-[10px] px-2 py-0.5 rounded-full"
+          >
+            {{ user.spotify_profile.product }}
+          </UBadge>
+
+          <UserAvatar
+            :src="avatarUrl"
+            :alt="displayName"
+            size="sm"
+            class="cursor-pointer ring-2 ring-(--color-primary) hover:ring-opacity-80 transition-all"
+          />
+        </div>
       </UDropdownMenu>
     </div>
   </header>

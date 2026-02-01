@@ -40,8 +40,15 @@ watch(
 
 const tracks = computed(() => currentPlaylistTracks.value);
 
-const handlePlayTrack = (track: Track) => {
-  console.log('Playing track', track);
+const { play } = useSpotifyPlayer();
+const { isPlayerVisible } = usePlayerState();
+
+const handlePlayTrack = (track: Track, index: number) => {
+  isPlayerVisible.value = true;
+  play({
+    context_uri: `spotify:playlist:${playlistId}`,
+    offset: { position: index },
+  });
 };
 
 const handleLoadMore = () => {

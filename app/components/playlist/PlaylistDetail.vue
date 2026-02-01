@@ -12,7 +12,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'play-track', track: Track): void;
+  (e: 'play-track', track: Track, index: number): void;
   (e: 'load-more'): void;
   (e: 'unfollowed'): void;
   (e: 'followed'): void;
@@ -28,7 +28,6 @@ const {
 } = usePlaylists();
 const { user } = useAuth();
 
-const isShuffleActive = ref(false);
 const isUnfollowModalOpen = ref(false);
 const isUnfollowing = ref(false);
 const isFollowingLoading = ref(false);
@@ -48,8 +47,8 @@ const isOwner = computed(() => {
   return p?.owner_id === user.value?.spotify_id;
 });
 
-const handlePlayTrack = (track: Track) => {
-  emit('play-track', track);
+const handlePlayTrack = (track: Track, index: number) => {
+  emit('play-track', track, index);
 };
 
 const handleLoadMore = () => {
@@ -130,11 +129,8 @@ const handleRemoveTrack = async () => {
         :playlist="playlist"
         :is-following="isFollowing"
         :is-following-loading="isFollowingLoading"
-        :is-shuffle-active="isShuffleActive"
-        @toggle-shuffle="isShuffleActive = !isShuffleActive"
         @follow="handleFollow"
         @unfollow="isUnfollowModalOpen = true"
-        @play="() => {}"
       />
 
       <div class="px-6 pb-2">

@@ -8,9 +8,11 @@ const props = withDefaults(
   defineProps<{
     playlists: Playlist[];
     loading?: boolean;
+    containingPlaylists?: Set<string | number>;
   }>(),
   {
     loading: false,
+    containingPlaylists: () => new Set(),
   },
 );
 
@@ -40,13 +42,14 @@ useIntersectionObserver(
       <p class="text-sm text-text-muted mb-4">
         Escolha em qual playlist você deseja salvar as recomendações.
       </p>
+
       <div
         class="grid gap-2 max-h-[400px] overflow-y-auto custom-scrollbar pr-2"
       >
         <button
           v-for="playlist in playlists"
           :key="playlist.id"
-          class="flex items-center gap-4 p-3 rounded-md hover:bg-surface-highlight transition-colors text-left w-full group"
+          class="flex items-center gap-4 p-3 rounded-md hover:bg-surface-highlight transition-colors text-left w-full group relative"
           @click="emit('select', playlist.id)"
         >
           <div class="shrink-0">
@@ -57,15 +60,23 @@ useIntersectionObserver(
             />
           </div>
 
-          <div class="flex flex-col min-w-0">
+          <div class="flex flex-col min-w-0 flex-1">
             <span
               class="text-sm font-bold text-text-main truncate group-hover:text-primary transition-colors"
+              :class="{ 'text-primary': containingPlaylists.has(playlist.id) }"
             >
               {{ playlist.name }}
             </span>
             <span class="text-xs text-text-muted">
               {{ playlist.count }}
             </span>
+          </div>
+
+          <div
+            v-if="containingPlaylists.has(playlist.id)"
+            class="shrink-0 text-primary"
+          >
+            <UIcon name="i-heroicons-check-circle-20-solid" class="w-6 h-6" />
           </div>
         </button>
 

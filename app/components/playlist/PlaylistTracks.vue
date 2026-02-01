@@ -12,7 +12,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'play-track', track: Track): void;
+  (e: 'play-track', track: Track, index: number): void;
   (e: 'remove-track', track: Track, index: number): void;
   (e: 'load-more'): void;
 }>();
@@ -33,8 +33,8 @@ useIntersectionObserver(
   },
 );
 
-const handlePlayTrack = (track: Track) => {
-  emit('play-track', track);
+const handlePlayTrack = (track: Track, index: number) => {
+  emit('play-track', track, index);
 };
 
 const handleRemoveTrack = (track: Track, index: number) => {

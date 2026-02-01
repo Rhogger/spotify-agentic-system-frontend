@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Track } from '~/models/playlist';
+import { useAuth } from '~/composables/useAuth';
 
 const props = defineProps<{
   track: Track;
@@ -9,18 +10,33 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'play', track: Track): void;
+  (e: 'play', track: Track, index: number): void;
   (e: 'remove', track: Track, index: number): void;
 }>();
 
+const { user } = useAuth();
+const isPremium = computed(
+  () => user.value?.spotify_profile?.product === 'premium',
+);
+
 const showActions = ref(false);
+
+const handlePlay = () => {
+  if (isPremium.value) {
+    emit('play', props.track, props.index);
+  }
+};
 </script>
 
 <template>
   <div
-    class="group grid grid-cols-[16px_4fr_3fr_2fr_4rem] gap-4 items-center px-2 py-2 rounded-md hover:bg-white/10 transition-colors text-sm text-text-muted"
+    class="group grid grid-cols-[16px_4fr_3fr_2fr_4rem] gap-4 items-center px-2 py-2 rounded-md transition-colors text-sm text-text-muted"
+    :class="{
+      'hover:bg-white/10': isPremium,
+      'opacity-60 grayscale-[0.5]': !isPremium,
+    }"
     role="button"
-    @dblclick="emit('play', track)"
+    @dblclick="handlePlay"
     @mouseenter="showActions = true"
     @mouseleave="showActions = false"
   >
@@ -28,11 +44,18 @@ const showActions = ref(false);
       {{ index + 1 }}
     </span>
 
-    <UIcon
-      name="i-heroicons-play-solid"
-      class="w-4 h-4 text-white hidden group-hover:block mx-auto cursor-pointer"
-      @click.stop="emit('play', track)"
-    />
+    <UTooltip
+      :text="isPremium ? 'Reproduzir' : 'Premium necessário'"
+      :popper="{ placement: 'top' }"
+      class="hidden group-hover:block mx-auto"
+    >
+      <UIcon
+        name="i-heroicons-play-solid"
+        class="w-4 h-4 text-white cursor-pointer"
+        :class="{ 'opacity-50 cursor-not-allowed': !isPremium }"
+        @click.stop="handlePlay"
+      />
+    </UTooltip>
 
     <div class="flex items-center gap-3 overflow-hidden">
       <img

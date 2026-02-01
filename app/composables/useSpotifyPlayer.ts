@@ -1,40 +1,46 @@
 /// <reference types="@types/spotify-web-playback-sdk" />
 
+const isConnected = ref(false);
+const isPaused = ref(true);
+const currentTrack = ref<Spotify.Track | null>(null);
+const deviceId = ref<string | null>(null);
+const player = ref<Spotify.Player | null>(null);
+const playerState = ref<Spotify.PlaybackState | null>(null);
+const accessToken = ref<string | null>(null);
+
 export const useSpotifyPlayer = () => {
-  const isConnected = useState<boolean>('spotify-connected', () => false);
-  const isPaused = useState<boolean>('spotify-paused', () => true);
-  const currentTrack = useState<Spotify.Track | null>(
-    'spotify-track',
-    () => null,
-  );
-  const deviceId = useState<string | null>('spotify-device-id', () => null);
-  const player = useState<Spotify.Player | null>('spotify-player', () => null);
-  const playerState = useState<Spotify.PlaybackState | null>(
-    'spotify-player-state',
-    () => null,
-  );
-  const accessToken = useState<string | null>('spotify-token', () => null);
-
-  const scriptLoaded = ref(false);
-
   const loadScript = () => {
-    if (import.meta.client) {
-      if (document.getElementById('spotify-player-script')) {
-        scriptLoaded.value = true;
-        return;
-      }
+    if (!import.meta.client) return;
+    if (document.getElementById('spotify-player-script')) return;
 
-      const script = document.createElement('script');
-      script.id = 'spotify-player-script';
-      script.src = 'https://sdk.scdn.co/spotify-player.js';
-      script.async = true;
-      document.body.appendChild(script);
-      scriptLoaded.value = true;
+    const script = document.createElement('script');
+    script.id = 'spotify-player-script';
+    script.src = 'https://sdk.scdn.co/spotify-player.js';
+    script.async = true;
+    document.body.appendChild(script);
+  };
+
+  const transferPlayback = async (id: string, token: string) => {
+    try {
+      await $fetch('https://api.spotify.com/v1/me/player', {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          device_ids: [id],
+          play: false,
+        },
+      });
+      console.log('Playback transferred to Web Player');
+    } catch (e) {
+      console.warn('Failed to transfer playback automatically', e);
     }
   };
 
   const initializePlayer = (token: string) => {
-    if (!import.meta.client) return;
+    if (!import.meta.client || player.value) return;
 
     accessToken.value = token;
 
@@ -43,8 +49,10 @@ export const useSpotifyPlayer = () => {
 
       const spotifyPlayer = new window.Spotify.Player({
         name: 'Spotify Agentic System',
-        getOAuthToken: (cb: (token: string) => void) => {
-          cb(token);
+        getOAuthToken: (cb: (t: string) => void) => {
+          const latestToken =
+            useCookie('spotify_access_token').value || accessToken.value;
+          cb(latestToken || token);
         },
         volume: 0.5,
       });
@@ -52,17 +60,22 @@ export const useSpotifyPlayer = () => {
       spotifyPlayer.addListener(
         'ready',
         ({ device_id }: { device_id: string }) => {
-          console.log('Ready with Device ID', device_id);
+          console.log('Player Ready - Device ID:', device_id);
           deviceId.value = device_id;
           isConnected.value = true;
+
+          const currentToken =
+            useCookie('spotify_access_token').value || accessToken.value;
+          if (currentToken) transferPlayback(device_id, currentToken);
         },
       );
 
       spotifyPlayer.addListener(
         'not_ready',
         ({ device_id }: { device_id: string }) => {
-          console.log('Device ID has gone offline', device_id);
+          console.log('Player Offline:', device_id);
           isConnected.value = false;
+          deviceId.value = null;
         },
       );
 
@@ -76,34 +89,90 @@ export const useSpotifyPlayer = () => {
         },
       );
 
-      spotifyPlayer.connect();
+      spotifyPlayer.addListener('initialization_error', ({ message }) => {
+        console.error('Spotify SDK Initialization Error:', message);
+      });
+
+      spotifyPlayer.addListener('authentication_error', ({ message }) => {
+        console.error('Spotify SDK Authentication Error:', message);
+      });
+
+      spotifyPlayer.addListener('account_error', ({ message }) => {
+        console.error('Spotify SDK Account Error:', message);
+      });
+
+      spotifyPlayer.addListener('playback_error', ({ message }) => {
+        console.error('Spotify SDK Playback Error:', message);
+        if (message.includes('DRM') || message.includes('Widevine')) {
+          console.error(
+            'ERRO DE DRM DETECTADO: Verifique se o seu navegador permite a execução de conteúdo protegido (Widevine). No Firefox/Linux, ative o DRM nas configurações.',
+          );
+        }
+      });
+
+      spotifyPlayer.connect().then((success) => {
+        if (success) {
+          console.log('Successfully connected to Spotify SDK');
+        }
+      });
       player.value = spotifyPlayer;
     };
+
+    loadScript();
   };
 
-  const playTrack = async (uris: string[]) => {
-    if (!deviceId.value || !accessToken.value) {
-      console.warn('Spotify Player not ready or no token');
+  const play = async (options: {
+    uris?: string[];
+    context_uri?: string;
+    offset?: { position?: number; uri?: string };
+  }) => {
+    const currentToken =
+      useCookie('spotify_access_token').value || accessToken.value;
+
+    if (!deviceId.value || !currentToken) {
+      console.warn('Spotify Player is not ready yet. Please wait a moment.');
       return;
     }
 
     try {
+      if (
+        player.value &&
+        typeof (player.value as any).activateElement === 'function'
+      ) {
+        (player.value as any).activateElement();
+      }
+
       await $fetch(
         `https://api.spotify.com/v1/me/player/play?device_id=${deviceId.value}`,
         {
           method: 'PUT',
           headers: {
-            Authorization: `Bearer ${accessToken.value}`,
+            Authorization: `Bearer ${currentToken}`,
             'Content-Type': 'application/json',
           },
-          body: {
-            uris,
-          },
+          body: options,
         },
-      );
+      ).catch(async (err) => {
+        if (err.status === 404) {
+          console.error('Device not found. Re-transferring...');
+          await transferPlayback(deviceId.value!, currentToken);
+          return $fetch(
+            `https://api.spotify.com/v1/me/player/play?device_id=${deviceId.value}`,
+            {
+              method: 'PUT',
+              headers: {
+                Authorization: `Bearer ${currentToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: options,
+            },
+          );
+        }
+        throw err;
+      });
       isPaused.value = false;
     } catch (e) {
-      console.error('Failed to play track via Web API', e);
+      console.error('Failed to play via Spotify Web API', e);
     }
   };
 
@@ -137,18 +206,60 @@ export const useSpotifyPlayer = () => {
     }
   };
 
+  const toggleShuffle = async (state: boolean) => {
+    const currentToken =
+      useCookie('spotify_access_token').value || accessToken.value;
+    if (!currentToken || !deviceId.value) return;
+
+    try {
+      await $fetch(
+        `https://api.spotify.com/v1/me/player/shuffle?state=${state}&device_id=${deviceId.value}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${currentToken}`,
+          },
+        },
+      );
+    } catch (e) {
+      console.error('Failed to toggle shuffle', e);
+    }
+  };
+
+  const setRepeatMode = async (mode: 'track' | 'context' | 'off') => {
+    const currentToken =
+      useCookie('spotify_access_token').value || accessToken.value;
+    if (!currentToken || !deviceId.value) return;
+
+    try {
+      await $fetch(
+        `https://api.spotify.com/v1/me/player/repeat?state=${mode}&device_id=${deviceId.value}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${currentToken}`,
+          },
+        },
+      );
+    } catch (e) {
+      console.error('Failed to set repeat mode', e);
+    }
+  };
+
   return {
-    loadScript,
     initializePlayer,
     isConnected,
     isPaused,
     currentTrack,
+    deviceId,
     playerState,
-    playTrack,
+    play,
     togglePlay,
     nextTrack,
     previousTrack,
     seek,
     setVolume,
+    toggleShuffle,
+    setRepeatMode,
   };
 };

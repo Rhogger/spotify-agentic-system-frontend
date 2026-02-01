@@ -20,7 +20,7 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
 });
 
-const { fetchUser } = useAuth();
+const { fetchUser, token } = useAuth();
 
 const route = useRoute();
 
@@ -33,8 +33,18 @@ onMounted(() => {
 
 <template>
   <UApp>
-    <NuxtLayout>
-      <NuxtPage />
-    </NuxtLayout>
+    <div
+      class="flex flex-col h-screen overflow-hidden bg-background text-foreground"
+    >
+      <div class="flex-1 overflow-hidden relative min-h-0">
+        <NuxtLayout>
+          <NuxtPage />
+        </NuxtLayout>
+      </div>
+
+      <div class="shrink-0 z-50">
+        <AppPlayer v-if="token" />
+      </div>
+    </div>
   </UApp>
 </template>
