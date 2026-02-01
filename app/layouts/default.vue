@@ -14,7 +14,6 @@
       </UMain>
     </div>
 
-    <!-- <AppPlayer /> -->
     <AppDrawer />
     <AppChatFab />
   </div>

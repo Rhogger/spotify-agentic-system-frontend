@@ -1,17 +1,55 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, computed, resolveComponent, watch } from 'vue';
+import { useIntersectionObserver } from '@vueuse/core';
 import { primaryButton } from '~/binds/buttons';
 import { dashedCard } from '~/binds/cards';
 import { usePlaylists } from '~/composables/usePlaylists';
 
-const { playlists, fetchPlaylists } = usePlaylists();
+import { useAuth } from '~/composables/useAuth';
+
+const props = defineProps<{
+  infiniteScroll?: boolean;
+}>();
+
+const { playlists, fetchPlaylists, isLoading, playlistsPagination } =
+  usePlaylists();
+const { token } = useAuth();
+
 const isModalOpen = ref(false);
 const newPlaylistName = ref('');
 const addRecommendations = ref(false);
+const loadMoreTrigger = ref<HTMLElement | null>(null);
 
-onMounted(() => {
-  fetchPlaylists();
-});
+const Wrapper = computed(() =>
+  props.infiniteScroll ? resolveComponent('UScrollArea') : 'div',
+);
+
+watch(
+  token,
+  (newToken) => {
+    if (newToken) {
+      fetchPlaylists();
+    }
+  },
+  { immediate: true },
+);
+
+useIntersectionObserver(
+  loadMoreTrigger,
+  (entries) => {
+    const entry = entries[0];
+    if (
+      entry?.isIntersecting &&
+      !isLoading.value &&
+      playlistsPagination.value.hasMore
+    ) {
+      fetchPlaylists(true);
+    }
+  },
+  {
+    threshold: 0.1,
+  },
+);
 
 function handleCreatePlaylist() {
   if (!newPlaylistName.value.trim()) return;
@@ -23,7 +61,7 @@ function handleCreatePlaylist() {
     count: '0 músicas',
     type: 'Playlist',
     icon: 'i-heroicons-musical-note',
-    color: 'bg-[#282828]',
+    color: '#282828',
   });
 
   isModalOpen.value = false;
@@ -33,7 +71,7 @@ function handleCreatePlaylist() {
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
+  <component :is="Wrapper" class="flex flex-col h-full">
     <div class="space-y-1 p-2">
       <UCard
         v-bind="dashedCard"
@@ -52,17 +90,47 @@ function handleCreatePlaylist() {
             class="w-6 h-6 text-text-muted group-hover:text-white transition-colors"
           />
         </div>
+
         <span
           class="font-medium text-text-muted group-hover:text-white transition-colors"
-          >Criar Playlist</span
         >
+          Criar Playlist
+        </span>
       </UCard>
 
-      <PlaylistCard
-        v-for="playlist in playlists"
-        :key="playlist.id"
-        v-bind="playlist"
-      />
+      <div
+        v-if="(isLoading || !token) && playlists.length === 0"
+        class="space-y-1"
+      >
+        <div
+          v-for="i in 5"
+          :key="i"
+          class="flex items-center gap-3 p-2 rounded-md"
+        >
+          <USkeleton class="w-12 h-12 rounded-md bg-white/5" />
+
+          <div class="flex-1 space-y-2">
+            <USkeleton class="h-4 w-3/4 bg-white/5" />
+            <USkeleton class="h-3 w-1/2 bg-white/5" />
+          </div>
+        </div>
+      </div>
+
+      <template v-else>
+        <PlaylistCard
+          v-for="playlist in playlists"
+          :key="playlist.id"
+          v-bind="playlist"
+        />
+
+        <div ref="loadMoreTrigger" class="flex justify-center py-2 min-h-4">
+          <UIcon
+            v-if="isLoading && playlists.length > 0"
+            name="i-heroicons-arrow-path"
+            class="w-5 h-5 animate-spin text-text-muted"
+          />
+        </div>
+      </template>
     </div>
 
     <BaseModal
@@ -77,6 +145,7 @@ function handleCreatePlaylist() {
           >
             Nome
           </label>
+
           <UInput
             v-model="newPlaylistName"
             placeholder="Minha playlist"
@@ -111,5 +180,5 @@ function handleCreatePlaylist() {
         </div>
       </template>
     </BaseModal>
-  </div>
+  </component>
 </template>

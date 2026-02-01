@@ -7,7 +7,7 @@
     <AppHeader />
 
     <div class="flex flex-1 overflow-hidden relative">
-      <AppSidebar hide-filters />
+      <AppSidebar hide-filters no-accordion />
 
       <UMain
         class="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-background"
@@ -16,7 +16,6 @@
       </UMain>
     </div>
 
-    <!-- <AppPlayer /> -->
     <AppDrawer />
     <AppChatFab />
   </div>

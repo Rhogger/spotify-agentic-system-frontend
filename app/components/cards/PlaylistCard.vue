@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import type { Playlist } from '~/models/playlist';
 import { ghostCard } from '~/binds/cards';
+import { usePlaylists } from '~/composables/usePlaylists';
 
-defineProps<Playlist>();
+const props = defineProps<Playlist>();
+const { selectPlaylist } = usePlaylists();
+
+function selectAndNavigate() {
+  selectPlaylist(props);
+  navigateTo('/playlist/' + props.id);
+}
 </script>
 
 <template>
@@ -10,16 +17,19 @@ defineProps<Playlist>();
     v-bind="ghostCard"
     tabindex="0"
     role="button"
-    @click="navigateTo('/playlist/' + id)"
-    @keydown.enter="navigateTo('/playlist/' + id)"
-    @keydown.space.prevent="navigateTo('/playlist/' + id)"
+    @click="selectAndNavigate"
+    @keydown.enter="selectAndNavigate"
+    @keydown.space.prevent="selectAndNavigate"
   >
     <div
       class="w-12 h-12 rounded flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105 overflow-hidden"
-      :class="
-        (!image && (gradient || color)) ||
-        (!image && 'bg-green-950/30 backdrop-blur-md border border-white/5')
-      "
+      :class="[
+        !image && !color && !gradient
+          ? 'bg-green-950/30 backdrop-blur-md border border-white/5'
+          : '',
+        !image && gradient ? gradient : '',
+      ]"
+      :style="{ backgroundColor: !image && color ? color : undefined }"
     >
       <img
         v-if="image"

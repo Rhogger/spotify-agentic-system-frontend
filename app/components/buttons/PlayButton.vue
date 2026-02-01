@@ -1,26 +1,54 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { primaryButton } from '~/binds/buttons';
+import { useSpotifyPlayer } from '~/composables/useSpotifyPlayer';
 
-interface Props {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-}
+const props = withDefaults(
+  defineProps<{
+    size?: 'sm' | 'md' | 'lg' | 'xl';
+    trackUri?: string;
+  }>(),
+  {
+    size: 'xl',
+    trackUri: '',
+  },
+);
 
-withDefaults(defineProps<Props>(), {
-  size: 'xl',
+const { playTrack, currentTrack, isPaused } = useSpotifyPlayer();
+const { isPlayerVisible } = usePlayerState();
+
+const isCurrentTrack = computed(() => {
+  return currentTrack.value?.uri === props.trackUri;
 });
 
-const isPlaying = ref(false);
+const isPlaying = computed(() => {
+  return isCurrentTrack.value && !isPaused.value;
+});
 
-function toggle() {
-  isPlaying.value = !isPlaying.value;
+async function toggle(e: Event) {
+  e.stopPropagation(); // Avoid triggering card click
+
+  if (!props.trackUri) {
+    console.warn('No track URI provided');
+    return;
+  }
+
+  isPlayerVisible.value = true;
+
+  // If we are already playing this track, maybe pause?
+  // For the button behavior "Começar a tocar", usually it validates state.
+  // But let's just play for now as requested "começar a tocar".
+  // If user clicks play and it's already playing, maybe they want to restart or just ensure play.
+  // Calling playTrack again restarts it or resumes.
+
+  await playTrack([props.trackUri]);
 }
 </script>
 
 <template>
   <UButton
     v-bind="primaryButton"
-    class="aspect-square flex items-center justify-center p-0 rounded-full shadow-[0_8px_20px_rgba(56,224,123,0.4)] hover:shadow-[0_12px_28px_rgba(56,224,123,0.5)]"
+    class="aspect-square flex items-center justify-center p-0 rounded-full shadow-[0_8px_20px_rgba(56,224,123,0.4)] hover:shadow-[0_12px_28px_rgba(56,224,123,0.5)] z-20"
     :class="{
       'w-14 h-14': size === 'xl',
       'w-12 h-12': size === 'lg',

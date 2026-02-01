@@ -1,16 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Track } from '~/models/track';
-import { ghostButton, primaryButton } from '~/binds/buttons';
-import MusicCard from '~/components/cards/MusicCard.vue';
-import { usePlaylists } from '~/composables/usePlaylists';
-import { useChatDrawer } from '~/composables/useChatDrawer';
-
-const { playlists } = usePlaylists();
-const isPlaylistModalOpen = ref(false);
-const isSongSelectionModalOpen = ref(false);
-const selectedPlaylistId = ref<number | string | null>(null);
-const selectedSongsIds = ref<Set<number>>(new Set());
+import HomeRecommendations from '~/components/home/HomeRecommendations.vue';
+import HomeEmptyState from '~/components/home/HomeEmptyState.vue';
 
 const baseRecommendations: Track[] = [
   {
@@ -79,228 +71,28 @@ const baseRecommendations: Track[] = [
   },
 ];
 
-const recommendations = ref<Track[]>(
-  Array.from({ length: 20 }, (_, i) => {
+const recommendations = ref<Track[]>([]);
+
+function generateRecommendations() {
+  recommendations.value = Array.from({ length: 20 }, (_, i) => {
     const base = baseRecommendations[i % baseRecommendations.length]!;
     return {
       ...base,
       id: i + 1,
     };
-  }),
-);
-
-function openPlaylistSelection() {
-  isPlaylistModalOpen.value = true;
-}
-
-function selectPlaylist(id: number | string) {
-  selectedPlaylistId.value = id;
-  isPlaylistModalOpen.value = false;
-  selectedSongsIds.value = new Set(recommendations.value.map((t) => t.id));
-  isSongSelectionModalOpen.value = true;
-}
-
-function confirmAddSongs() {
-  console.log(
-    `Adicionando ${selectedSongsIds.value.size} músicas à playlist ${selectedPlaylistId.value}`,
-  );
-  isSongSelectionModalOpen.value = false;
-  selectedPlaylistId.value = null;
-}
-
-function toggleSong(id: number) {
-  if (selectedSongsIds.value.has(id)) {
-    selectedSongsIds.value.delete(id);
-  } else {
-    selectedSongsIds.value.add(id);
-  }
+  });
 }
 </script>
 
 <template>
   <UPage class="h-full overflow-y-auto custom-scrollbar">
     <UPageBody class="p-8">
-      <div v-if="recommendations.length > 0">
-        <div
-          class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4"
-        >
-          <h2 class="text-2xl font-bold text-text-main">
-            Músicas Recomendadas
-          </h2>
+      <HomeRecommendations
+        v-if="recommendations.length > 0"
+        :recommendations="recommendations"
+      />
 
-          <UButton
-            v-bind="ghostButton"
-            icon="i-heroicons-plus-circle"
-            label="Adicionar à playlist"
-            class="px-4"
-            @click="openPlaylistSelection"
-          />
-        </div>
-
-        <div
-          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mx-auto max-w-screen-2xl"
-        >
-          <MusicCard
-            v-for="track in recommendations"
-            :key="track.id"
-            :track="track"
-          />
-        </div>
-      </div>
-
-      <div
-        v-else
-        class="flex-1 flex flex-col items-center justify-center min-h-[60vh] text-center space-y-12"
-      >
-        <div class="relative w-64 h-64 flex items-center justify-center">
-          <div
-            class="absolute inset-0 bg-primary/20 blur-[60px] rounded-full animate-pulse"
-            style="animation-duration: 4s"
-          ></div>
-          <div
-            class="absolute inset-10 bg-primary/10 blur-2xl rounded-full"
-          ></div>
-
-          <div
-            class="absolute inset-0 border border-white/5 rounded-full animate-[spin_12s_linear_infinite]"
-          ></div>
-          <div
-            class="absolute inset-0 border-t border-primary/20 rounded-full animate-[spin_12s_linear_infinite]"
-          ></div>
-
-          <div
-            class="absolute inset-8 border border-white/10 rounded-full animate-[spin_8s_linear_infinite]"
-            style="animation-direction: reverse"
-          ></div>
-          <div
-            class="absolute inset-8 border-b border-primary/40 rounded-full animate-[spin_8s_linear_infinite]"
-            style="animation-direction: reverse"
-          ></div>
-
-          <div
-            class="relative w-32 h-32 rounded-full bg-linear-to-br from-white/10 to-transparent border border-white/20 backdrop-blur-md flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.3)] group hover:scale-110 transition-transform duration-500"
-          >
-            <UIcon
-              name="i-heroicons-sparkles"
-              class="w-14 h-14 text-primary drop-shadow-[0_0_15px_rgba(var(--color-primary-DEFAULT),0.8)] animate-pulse"
-              style="animation-duration: 3s"
-            />
-          </div>
-
-          <div
-            class="absolute top-4 right-12 w-2 h-2 bg-primary rounded-full blur-[1px] animate-ping"
-            style="animation-duration: 3s"
-          />
-          <div
-            class="absolute bottom-12 left-6 w-1.5 h-1.5 bg-white/40 rounded-full blur-[1px] animate-pulse"
-          />
-        </div>
-
-        <div class="space-y-4 max-w-lg px-4 relative z-10">
-          <h3
-            class="text-4xl font-black bg-clip-text text-transparent bg-linear-to-r from-white via-primary/50 to-white/60 drop-shadow-sm"
-          >
-            Descubra novos sons
-          </h3>
-          <p class="text-xl text-text-muted/80 font-light leading-relaxed">
-            O silêncio está prestes a acabar. <br />
-            <span class="text-primary/80 font-medium"
-              >Peça uma recomendação</span
-            >
-            e deixe a mágica acontecer.
-          </p>
-        </div>
-      </div>
-
-      <BaseModal v-model="isPlaylistModalOpen" title="Salvar na playlist">
-        <div class="space-y-2">
-          <p class="text-sm text-text-muted mb-4">
-            Escolha em qual playlist você deseja salvar as recomendações.
-          </p>
-          <div class="grid gap-2">
-            <button
-              v-for="playlist in playlists"
-              :key="playlist.id"
-              class="flex items-center gap-4 p-3 rounded-md hover:bg-surface-highlight transition-colors text-left w-full group"
-              @click="selectPlaylist(playlist.id)"
-            >
-              <div
-                class="w-12 h-12 rounded flex items-center justify-center shrink-0 shadow-sm"
-                :class="
-                  playlist.gradient || playlist.color || 'bg-surface-elevated'
-                "
-              >
-                <UIcon
-                  v-if="playlist.icon"
-                  :name="playlist.icon"
-                  class="text-white w-6 h-6"
-                />
-              </div>
-              <div class="flex flex-col min-w-0">
-                <span
-                  class="text-sm font-bold text-text-main truncate group-hover:text-primary transition-colors"
-                >
-                  {{ playlist.name }}
-                </span>
-                <span class="text-xs text-text-muted">
-                  {{ playlist.count }}
-                </span>
-              </div>
-            </button>
-          </div>
-        </div>
-      </BaseModal>
-
-      <BaseModal v-model="isSongSelectionModalOpen" title="Selecionar músicas">
-        <div class="space-y-4">
-          <p class="text-sm text-text-muted">
-            Selecione quais músicas você deseja adicionar à playlist.
-          </p>
-
-          <div
-            class="max-h-[400px] overflow-y-auto custom-scrollbar pr-2 space-y-2"
-          >
-            <div
-              v-for="track in recommendations"
-              :key="track.id"
-              class="flex items-center gap-3 p-2 rounded-md hover:bg-surface-highlight transition-colors cursor-pointer"
-              @click="toggleSong(track.id)"
-            >
-              <UCheckbox
-                :model-value="selectedSongsIds.has(track.id)"
-                color="primary"
-                @click.stop="toggleSong(track.id)"
-              />
-              <img :src="track.image" class="w-10 h-10 rounded object-cover" />
-              <div class="flex flex-col min-w-0">
-                <span class="text-sm font-bold text-text-main truncate">{{
-                  track.title
-                }}</span>
-                <span class="text-xs text-text-muted truncate">{{
-                  track.artist
-                }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <template #footer>
-          <div class="flex justify-end gap-3">
-            <UButton
-              v-bind="ghostButton"
-              label="Cancelar"
-              @click="isSongSelectionModalOpen = false"
-            />
-            <UButton
-              v-bind="primaryButton"
-              :label="`Adicionar ${selectedSongsIds.size} músicas`"
-              :disabled="selectedSongsIds.size === 0"
-              class="text-black font-bold"
-              @click="confirmAddSongs"
-            />
-          </div>
-        </template>
-      </BaseModal>
+      <HomeEmptyState v-else @generate="generateRecommendations" />
     </UPageBody>
   </UPage>
 </template>

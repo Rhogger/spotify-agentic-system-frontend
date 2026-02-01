@@ -37,6 +37,7 @@ defineProps<{
 
         <PlayButton
           size="lg"
+          :track-uri="track.uri || `spotify:track:${track.id}`"
           class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-75 transform translate-y-4 group-hover:translate-y-0 shadow-[0_8px_24px_rgba(56,224,123,0.3)] hover:scale-110 active:scale-95"
         />
       </div>
