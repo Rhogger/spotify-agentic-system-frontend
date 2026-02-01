@@ -1,6 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  srcDir: 'app',
   modules: ['@nuxt/eslint', '@nuxt/ui'],
+
+  future: {
+    compatibilityVersion: 4,
+  },
 
   components: [
     {

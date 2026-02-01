@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import HomeRecommendations from '~/components/home/HomeRecommendations.vue';
 import HomeEmptyState from '~/components/home/HomeEmptyState.vue';
-import HomeSkeleton from '~/components/home/HomeSkeleton.vue';
+import HomeSkeleton from '~/components/skeletons/HomeSkeleton.vue';
 import { useRecommendations } from '~/composables/useRecommendations';
 
 const { recommendations, isLoading, fetchRecommendations } =

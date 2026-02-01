@@ -21,28 +21,8 @@ function selectAndNavigate() {
     @keydown.enter="selectAndNavigate"
     @keydown.space.prevent="selectAndNavigate"
   >
-    <div
-      class="w-12 h-12 rounded flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105 overflow-hidden"
-      :class="[
-        !image && !color && !gradient
-          ? 'bg-green-950/30 backdrop-blur-md border border-white/5'
-          : '',
-        !image && gradient ? gradient : '',
-      ]"
-      :style="{ backgroundColor: !image && color ? color : undefined }"
-    >
-      <img
-        v-if="image"
-        :src="image"
-        :alt="name"
-        class="w-full h-full object-cover"
-      />
-      <UIcon
-        v-else-if="icon"
-        :name="icon"
-        class="text-primary w-6 h-6 drop-shadow-sm"
-        :class="{ 'fill-current': name === 'Músicas Curtidas' }"
-      />
+    <div class="shrink-0 shadow-sm transition-transform group-hover:scale-105">
+      <PlaylistImage :src="image" :alt="name" size="sm" />
     </div>
 
     <div class="flex flex-col min-w-0">

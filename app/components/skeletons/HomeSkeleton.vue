@@ -1,6 +1,4 @@
-<script setup lang="ts">
-import MusicCardSkeleton from '~/components/cards/MusicCardSkeleton.vue';
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div>

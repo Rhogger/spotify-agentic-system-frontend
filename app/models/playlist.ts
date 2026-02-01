@@ -111,13 +111,18 @@ export interface Playlist {
   description?: string | null;
   type: string;
   count: string;
+  total_tracks?: number;
   image?: string;
   icon?: string;
   color?: string;
   gradient?: string;
   active?: boolean;
   owner_name?: string | null;
+  owner_image?: string | null;
+  owner_id?: string;
   formatted_duration?: string;
+  privacy?: 'Public' | 'Private';
+  snapshot_id?: string;
 }
 
 export interface PlaylistDetail {
@@ -125,6 +130,7 @@ export interface PlaylistDetail {
   name: string;
   description: string | null;
   owner: string;
+  owner_id?: string;
   followers: number;
   total_tracks: number;
   total_duration_ms: number;
@@ -138,4 +144,35 @@ export interface PlaylistDetail {
 export interface PlaylistDetailMCPResponse {
   md: string | null;
   json: PlaylistDetail | null;
+}
+
+export interface CreatePlaylistInput {
+  name: string;
+  description?: string;
+  public?: boolean;
+}
+
+export interface UpdatePlaylistInput {
+  name?: string;
+  description?: string;
+  public?: boolean;
+}
+
+export interface AddTracksInput {
+  track_ids: string[];
+  position?: number;
+}
+
+export interface RemoveTracksInput {
+  track_ids: string[];
+  snapshot_id?: string;
+  positions?: number[];
+}
+
+export interface PlaylistOperationResponse {
+  success: boolean;
+  message: string;
+  playlist_id?: string;
+  playlist_url?: string;
+  snapshot_id?: string;
 }

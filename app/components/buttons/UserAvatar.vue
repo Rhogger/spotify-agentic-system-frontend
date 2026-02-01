@@ -1,18 +1,6 @@
 <script setup lang="ts">
 import { useImage } from '@vueuse/core';
 
-/**
- * UserAvatar Component
- *
- * Displays user avatar or fallback initials with consistent styling.
- *
- * Props:
- * - src: Image URL (optional)
- * - alt: Alt text (optional, default "User")
- * - size: Avatar size (default "sm") - compatible with UAvatar
- * - initials: Text to display if no image (optional)
- */
-
 interface Props {
   src?: string;
   alt?: string;
@@ -36,21 +24,7 @@ const isLoading = computed(() => !!props.src && imageLoading.value);
 
 <template>
   <div class="relative inline-flex rounded-full">
-    <USkeleton
-      v-if="src && isLoading"
-      class="rounded-full bg-surface-elevated"
-      :class="[
-        size === '3xs' ? 'h-4 w-4' : '',
-        size === '2xs' ? 'h-5 w-5' : '',
-        size === 'xs' ? 'h-6 w-6' : '',
-        size === 'sm' ? 'h-8 w-8' : '',
-        size === 'md' ? 'h-10 w-10' : '',
-        size === 'lg' ? 'h-12 w-12' : '',
-        size === 'xl' ? 'h-14 w-14' : '',
-        size === '2xl' ? 'h-16 w-16' : '',
-        size === '3xl' ? 'h-20 w-20' : '',
-      ]"
-    />
+    <UserAvatarSkeleton v-if="src && isLoading" :size="size" />
 
     <UAvatar
       v-show="!src || !isLoading"

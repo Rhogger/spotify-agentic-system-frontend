@@ -5,7 +5,6 @@ import { usePlaylistTracks } from '~/composables/usePlaylistTracks';
 import { useAuth } from '~/composables/useAuth';
 import type { Track } from '~/models/playlist';
 import PlaylistDetail from '~/components/playlist/PlaylistDetail.vue';
-import PlaylistSkeleton from '~/components/playlist/PlaylistSkeleton.vue';
 import PlaylistNotFound from '~/components/playlist/PlaylistNotFound.vue';
 
 const route = useRoute();
@@ -18,6 +17,7 @@ const {
   isLoading: isTracksLoading,
   pagination: tracksPagination,
   fetchTracks: fetchPlaylistTracks,
+  removeTrackFromList,
 } = usePlaylistTracks();
 
 definePageMeta({
@@ -47,6 +47,11 @@ const handlePlayTrack = (track: Track) => {
 const handleLoadMore = () => {
   fetchPlaylistTracks(playlistId, true);
 };
+
+const handleTrackRemoved = (track: Track) => {
+  getPlaylist(playlistId);
+  removeTrackFromList(track.id);
+};
 </script>
 
 <template>
@@ -60,6 +65,7 @@ const handleLoadMore = () => {
     :has-more-tracks="tracksPagination.hasMore"
     @play-track="handlePlayTrack"
     @load-more="handleLoadMore"
+    @track-removed="handleTrackRemoved"
   />
 
   <PlaylistNotFound v-else />

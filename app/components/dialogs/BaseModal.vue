@@ -1,19 +1,12 @@
 <script setup lang="ts">
-import type { CardProps } from '@nuxt/ui';
+import type { ModalProps } from '@nuxt/ui';
 import { iconButton } from '~/binds/buttons';
-import { baseTooltip } from '~/binds/tooltips';
-
-/**
- * BaseModal Component
- *
- * Reusable modal component adhering to the Spotify Agentic System style guide.
- * Wraps UModal and UCard with consistent styling for backdrop, header, body, and footer.
- */
 
 interface Props {
-  modelValue: boolean;
-  title: string;
-  ui?: Pick<CardProps, 'ui'>;
+  modelValue: ModalProps['open'];
+  title: ModalProps['title'];
+  description?: ModalProps['description'];
+  ui?: ModalProps['ui'];
 }
 
 const props = defineProps<Props>();
@@ -31,48 +24,31 @@ const isOpen = computed({
 <template>
   <UModal
     v-model:open="isOpen"
-    :ui="{ overlay: 'bg-black/60 backdrop-blur-sm' }"
+    :title="title"
+    :description="description || ' '"
+    :ui="{
+      content:
+        'bg-surface-dialog ring-1 ring-white/10 sm:max-w-lg rounded-lg shadow-xl overflow-hidden flex flex-col',
+      overlay: 'bg-black/80 backdrop-blur-md',
+      header:
+        'p-4 border-b border-white/5 flex items-center justify-between shrink-0',
+      body: 'p-6 overflow-y-auto flex-1',
+      footer:
+        'p-4 border-t border-white/5 flex items-center justify-end gap-3 shrink-0',
+      title: 'text-xl font-bold text-text-main',
+      ...ui,
+    }"
+    :close="{
+      ...iconButton,
+      icon: 'i-heroicons-x-mark',
+    }"
   >
-    <template #content>
-      <UCard
-        :ui="{
-          root: 'bg-surface-card ring-1 ring-border divide-y divide-border',
-          body: 'p-0 sm:p-0',
-          header: 'p-4 sm:p-4 border-b border-border',
-          footer: 'p-4 sm:p-4 border-t border-border bg-surface-card',
-          ...ui,
-        }"
-      >
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-xl font-bold text-text-main">
-              {{ title }}
-            </h3>
+    <template #body>
+      <slot />
+    </template>
 
-            <UTooltip
-              text="Fechar"
-              v-bind="baseTooltip"
-            >
-              <UButton
-                v-bind="iconButton"
-                icon="i-heroicons-x-mark"
-                @click="isOpen = false"
-              />
-            </UTooltip>
-          </div>
-        </template>
-
-        <div class="p-6 bg-surface-card">
-          <slot />
-        </div>
-
-        <template
-          v-if="$slots.footer"
-          #footer
-        >
-          <slot name="footer" />
-        </template>
-      </UCard>
+    <template v-if="$slots.footer" #footer>
+      <slot name="footer" />
     </template>
   </UModal>
 </template>

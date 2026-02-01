@@ -14,7 +14,7 @@ export const usePlaylistTracks = () => {
   const isLoading = ref(false);
   const pagination = ref({
     offset: 0,
-    limit: 10,
+    limit: 50,
     hasMore: true,
   });
 
@@ -81,10 +81,15 @@ export const usePlaylistTracks = () => {
     }
   };
 
+  const removeTrackFromList = (trackId: string | number) => {
+    tracks.value = tracks.value.filter((t) => String(t.id) !== String(trackId));
+  };
+
   return {
     tracks,
     isLoading,
     pagination,
     fetchTracks,
+    removeTrackFromList,
   };
 };

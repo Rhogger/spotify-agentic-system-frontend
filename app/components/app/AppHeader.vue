@@ -52,7 +52,7 @@ const items = computed(() => [
 
     <div class="ml-auto flex items-center gap-2">
       <template v-if="isLoading && !user">
-        <USkeleton class="h-8 w-8 rounded-full bg-surface-elevated" />
+        <AppHeaderSkeleton />
       </template>
 
       <UDropdownMenu

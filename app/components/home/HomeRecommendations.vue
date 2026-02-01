@@ -1,44 +1,122 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Track } from '~/models/track';
-import { ghostButton, primaryButton } from '~/binds/buttons';
+import { ghostButton } from '~/binds/buttons';
 import MusicCard from '~/components/cards/MusicCard.vue';
 import { usePlaylists } from '~/composables/usePlaylists';
+import { useAuth } from '~/composables/useAuth';
 
 const props = defineProps<{
   recommendations: Track[];
 }>();
 
-const { playlists } = usePlaylists();
+const {
+  playlists,
+  addTracksToPlaylist,
+  fetchPlaylists,
+  isLoading: isPlaylistsLoading,
+} = usePlaylists();
+const { user } = useAuth();
+
+const myPlaylists = computed(() =>
+  playlists.value.filter((p) => p.owner_id === user.value?.spotify_id),
+);
+
 const isPlaylistModalOpen = ref(false);
-const isSongSelectionModalOpen = ref(false);
-const selectedPlaylistId = ref<number | null>(null);
-const selectedSongsIds = ref<Set<number>>(new Set());
+const isTrackSelectionModalOpen = ref(false);
+const selectedPlaylistId = ref<string | null>(null);
+const selectedTracksIds = ref<Set<string>>(new Set());
+const isAddingTracks = ref(false);
+const pendingTracksToAdd = ref<Track[]>([]);
+const isSingleTrackAdd = ref(false);
+const toast = useToast();
 
 function openPlaylistSelection() {
+  isSingleTrackAdd.value = false;
+  if (playlists.value.length === 0) {
+    fetchPlaylists();
+  }
+  pendingTracksToAdd.value = props.recommendations;
   isPlaylistModalOpen.value = true;
 }
 
-function selectPlaylist(id: number | string) {
-  selectedPlaylistId.value = Number(id);
-  isPlaylistModalOpen.value = false;
-  selectedSongsIds.value = new Set(props.recommendations.map((t) => t.id));
-  isSongSelectionModalOpen.value = true;
+function handleAddToPlaylist(track: Track) {
+  isSingleTrackAdd.value = true;
+  if (playlists.value.length === 0) {
+    fetchPlaylists();
+  }
+  pendingTracksToAdd.value = [track];
+  isPlaylistModalOpen.value = true;
 }
 
-function confirmAddSongs() {
-  console.log(
-    `Adicionando ${selectedSongsIds.value.size} músicas à playlist ${selectedPlaylistId.value}`,
-  );
-  isSongSelectionModalOpen.value = false;
-  selectedPlaylistId.value = null;
-}
+async function selectPlaylist(id: number | string) {
+  selectedPlaylistId.value = String(id);
 
-function toggleSong(id: number) {
-  if (selectedSongsIds.value.has(id)) {
-    selectedSongsIds.value.delete(id);
+  if (isSingleTrackAdd.value) {
+    isPlaylistModalOpen.value = false;
+    const track = pendingTracksToAdd.value[0];
+
+    if (track) {
+      const result = await addTracksToPlaylist(String(id), {
+        track_ids: [track.spotify_id],
+      });
+
+      if (result?.success) {
+        toast.add({
+          title: 'Sucesso',
+          description: 'Música adicionada à playlist.',
+          color: 'success',
+        });
+      } else {
+        toast.add({
+          title: 'Erro',
+          description: 'Falha ao adicionar música.',
+          color: 'error',
+        });
+      }
+    }
+
+    pendingTracksToAdd.value = [];
+    selectedPlaylistId.value = null;
+    isSingleTrackAdd.value = false;
   } else {
-    selectedSongsIds.value.add(id);
+    isPlaylistModalOpen.value = false;
+    selectedTracksIds.value = new Set(
+      pendingTracksToAdd.value.map((t) => t.spotify_id),
+    );
+    isTrackSelectionModalOpen.value = true;
+  }
+}
+
+async function confirmAddTracks() {
+  if (!selectedPlaylistId.value || selectedTracksIds.value.size === 0) return;
+
+  isAddingTracks.value = true;
+
+  const result = await addTracksToPlaylist(selectedPlaylistId.value, {
+    track_ids: Array.from(selectedTracksIds.value),
+  });
+
+  isAddingTracks.value = false;
+
+  if (result?.success) {
+    toast.add({
+      title: 'Sucesso',
+      description: `${selectedTracksIds.value.size} músicas adicionadas à playlist.`,
+      color: 'success',
+    });
+    isTrackSelectionModalOpen.value = false;
+    selectedPlaylistId.value = null;
+    selectedTracksIds.value = new Set();
+  }
+}
+
+function toggleTrack(spotifyId: string) {
+  const trackId = spotifyId;
+  if (selectedTracksIds.value.has(trackId)) {
+    selectedTracksIds.value.delete(trackId);
+  } else {
+    selectedTracksIds.value.add(trackId);
   }
 }
 </script>
@@ -66,100 +144,25 @@ function toggleSong(id: number) {
         v-for="track in recommendations"
         :key="track.id"
         :track="track"
+        @add-to-playlist="handleAddToPlaylist"
       />
     </div>
 
-    <BaseModal v-model="isPlaylistModalOpen" title="Salvar na playlist">
-      <div class="space-y-2">
-        <p class="text-sm text-text-muted mb-4">
-          Escolha em qual playlist você deseja salvar as recomendações.
-        </p>
-        <div class="grid gap-2">
-          <button
-            v-for="playlist in playlists"
-            :key="playlist.id"
-            class="flex items-center gap-4 p-3 rounded-md hover:bg-surface-highlight transition-colors text-left w-full group"
-            @click="selectPlaylist(playlist.id)"
-          >
-            <div
-              class="w-12 h-12 rounded flex items-center justify-center shrink-0 shadow-sm"
-              :class="
-                playlist.gradient || playlist.color || 'bg-surface-elevated'
-              "
-            >
-              <UIcon
-                v-if="playlist.icon"
-                :name="playlist.icon"
-                class="text-white w-6 h-6"
-              />
-            </div>
-            <div class="flex flex-col min-w-0">
-              <span
-                class="text-sm font-bold text-text-main truncate group-hover:text-primary transition-colors"
-              >
-                {{ playlist.name }}
-              </span>
-              <span class="text-xs text-text-muted">
-                {{ playlist.count }}
-              </span>
-            </div>
-          </button>
-        </div>
-      </div>
-    </BaseModal>
+    <PlaylistSelectionModal
+      v-model="isPlaylistModalOpen"
+      :playlists="myPlaylists"
+      :loading="isPlaylistsLoading"
+      @select="selectPlaylist"
+      @load-more="fetchPlaylists(true)"
+    />
 
-    <BaseModal v-model="isSongSelectionModalOpen" title="Selecionar músicas">
-      <div class="space-y-4">
-        <p class="text-sm text-text-muted">
-          Selecione quais músicas você deseja adicionar à playlist.
-        </p>
-
-        <div
-          class="max-h-[400px] overflow-y-auto custom-scrollbar pr-2 space-y-2"
-        >
-          <div
-            v-for="track in recommendations"
-            :key="track.id"
-            class="flex items-center gap-3 p-2 rounded-md hover:bg-surface-highlight transition-colors cursor-pointer"
-            @click="toggleSong(track.id)"
-          >
-            <UCheckbox
-              :model-value="selectedSongsIds.has(track.id)"
-              color="primary"
-              @click.stop="toggleSong(track.id)"
-            />
-            <img
-              :src="track.image_url"
-              class="w-10 h-10 rounded object-cover"
-            />
-            <div class="flex flex-col min-w-0">
-              <span class="text-sm font-bold text-text-main truncate">{{
-                track.name
-              }}</span>
-              <span class="text-xs text-text-muted truncate">{{
-                track.artists
-              }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <template #footer>
-        <div class="flex justify-end gap-3">
-          <UButton
-            v-bind="ghostButton"
-            label="Cancelar"
-            @click="isSongSelectionModalOpen = false"
-          />
-          <UButton
-            v-bind="primaryButton"
-            :label="`Adicionar ${selectedSongsIds.size} músicas`"
-            :disabled="selectedSongsIds.size === 0"
-            class="text-black font-bold"
-            @click="confirmAddSongs"
-          />
-        </div>
-      </template>
-    </BaseModal>
+    <TrackSelectionModal
+      v-model="isTrackSelectionModalOpen"
+      :recommendations="recommendations"
+      :selected-ids="selectedTracksIds"
+      :loading="isAddingTracks"
+      @toggle="toggleTrack"
+      @confirm="confirmAddTracks"
+    />
   </div>
 </template>

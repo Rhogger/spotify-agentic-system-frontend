@@ -38,7 +38,6 @@ export const useSpotifyPlayer = () => {
 
     accessToken.value = token;
 
-    // Define global callback
     window.onSpotifyWebPlaybackSDKReady = () => {
       if (!window.Spotify) return;
 
@@ -102,7 +101,6 @@ export const useSpotifyPlayer = () => {
           },
         },
       );
-      // We optimistically set paused to false, but the state listener will confirm it
       isPaused.value = false;
     } catch (e) {
       console.error('Failed to play track via Web API', e);
@@ -135,7 +133,6 @@ export const useSpotifyPlayer = () => {
 
   const setVolume = async (volume: number) => {
     if (player.value) {
-      // SDK volume is 0.0 to 1.0
       await player.value.setVolume(volume / 100);
     }
   };

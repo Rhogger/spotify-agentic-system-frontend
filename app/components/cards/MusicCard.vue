@@ -2,9 +2,14 @@
 import type { Track } from '~/models/track';
 import { baseButton } from '~/binds/buttons';
 import PlayButton from '~/components/buttons/PlayButton.vue';
+import OverflowText from '~/components/text/OverflowText.vue';
 
 const props = defineProps<{
   track: Track;
+}>();
+
+const emit = defineEmits<{
+  (e: 'add-to-playlist', track: Track): void;
 }>();
 
 const formattedArtists = computed(() => {
@@ -19,11 +24,11 @@ const formattedArtists = computed(() => {
 
 <template>
   <div
-    class="group cursor-pointer bg-surface-elevated/50 hover:bg-surface-card transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] border border-white/3 hover:border-white/8 rounded-xl p-3"
+    class="group cursor-pointer bg-white/5 hover:bg-surface-card transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] border border-white/3 hover:border-white/8 rounded-xl p-3"
   >
     <div class="flex flex-col gap-3">
       <div
-        class="relative w-full aspect-square overflow-hidden rounded-lg shadow-xl shadow-black/20"
+        class="relative w-full aspect-square overflow-hidden rounded-lg shadow-xl shadow-black/20 bg-white/5"
       >
         <img
           :src="track.image_url"
@@ -42,6 +47,7 @@ const formattedArtists = computed(() => {
           variant="solid"
           class="absolute top-3 right-3 size-10 backdrop-blur-md bg-white/10 border border-white/20 hover:bg-primary hover:text-black hover:border-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-y-4 group-hover:translate-y-0 z-10"
           title="Adicionar à playlist"
+          @click.stop="emit('add-to-playlist', track)"
         />
 
         <PlayButton
@@ -52,15 +58,15 @@ const formattedArtists = computed(() => {
       </div>
 
       <div class="flex flex-col min-w-0">
-        <h3
-          class="font-bold text-text-main truncate text-sm group-hover:text-primary transition-colors duration-300"
-        >
-          {{ track.name }}
-        </h3>
+        <OverflowText
+          :text="track.name"
+          class="font-bold text-text-main text-sm group-hover:text-primary transition-colors duration-300"
+        />
 
-        <p class="text-xs font-medium text-text-muted truncate mt-0.5">
-          {{ formattedArtists }}
-        </p>
+        <OverflowText
+          :text="formattedArtists"
+          class="text-xs font-medium text-text-muted mt-0.5"
+        />
 
         <div v-if="track.explicit" class="flex items-center mt-2">
           <span

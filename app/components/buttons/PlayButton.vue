@@ -26,7 +26,7 @@ const isPlaying = computed(() => {
 });
 
 async function toggle(e: Event) {
-  e.stopPropagation(); // Avoid triggering card click
+  e.stopPropagation();
 
   if (!props.trackUri) {
     console.warn('No track URI provided');
@@ -34,12 +34,6 @@ async function toggle(e: Event) {
   }
 
   isPlayerVisible.value = true;
-
-  // If we are already playing this track, maybe pause?
-  // For the button behavior "Começar a tocar", usually it validates state.
-  // But let's just play for now as requested "começar a tocar".
-  // If user clicks play and it's already playing, maybe they want to restart or just ensure play.
-  // Calling playTrack again restarts it or resumes.
 
   await playTrack([props.trackUri]);
 }

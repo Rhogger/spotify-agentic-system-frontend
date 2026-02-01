@@ -1,24 +1,27 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, resolveComponent, watch } from 'vue';
+import { ref, computed, resolveComponent, watch } from 'vue';
 import { useIntersectionObserver } from '@vueuse/core';
-import { primaryButton } from '~/binds/buttons';
 import { dashedCard } from '~/binds/cards';
 import { usePlaylists } from '~/composables/usePlaylists';
-
 import { useAuth } from '~/composables/useAuth';
 
 const props = defineProps<{
   infiniteScroll?: boolean;
 }>();
 
-const { playlists, fetchPlaylists, isLoading, playlistsPagination } =
-  usePlaylists();
+const {
+  playlists,
+  fetchPlaylists,
+  createPlaylist,
+  isLoading,
+  playlistsPagination,
+} = usePlaylists();
 const { token } = useAuth();
 
 const isModalOpen = ref(false);
-const newPlaylistName = ref('');
-const addRecommendations = ref(false);
+const isCreating = ref(false);
 const loadMoreTrigger = ref<HTMLElement | null>(null);
+const toast = useToast();
 
 const Wrapper = computed(() =>
   props.infiniteScroll ? resolveComponent('UScrollArea') : 'div',
@@ -51,22 +54,35 @@ useIntersectionObserver(
   },
 );
 
-function handleCreatePlaylist() {
-  if (!newPlaylistName.value.trim()) return;
+async function handleCreatePlaylist(data: {
+  name: string;
+  description: string;
+  public: boolean;
+}) {
+  isCreating.value = true;
 
-  const newId = playlists.value.length + 1;
-  playlists.value.push({
-    id: newId,
-    name: newPlaylistName.value,
-    count: '0 músicas',
-    type: 'Playlist',
-    icon: 'i-heroicons-musical-note',
-    color: '#282828',
+  const result = await createPlaylist({
+    name: data.name,
+    description: data.description || undefined,
+    public: data.public,
   });
 
-  isModalOpen.value = false;
-  newPlaylistName.value = '';
-  addRecommendations.value = false;
+  isCreating.value = false;
+
+  if (result?.success) {
+    toast.add({
+      title: 'Sucesso',
+      description: 'Playlist criada com sucesso.',
+      color: 'success',
+    });
+    isModalOpen.value = false;
+  } else {
+    toast.add({
+      title: 'Erro',
+      description: 'Falha ao criar playlist.',
+      color: 'error',
+    });
+  }
 }
 </script>
 
@@ -98,23 +114,9 @@ function handleCreatePlaylist() {
         </span>
       </UCard>
 
-      <div
+      <SidebarPlaylistsSkeleton
         v-if="(isLoading || !token) && playlists.length === 0"
-        class="space-y-1"
-      >
-        <div
-          v-for="i in 5"
-          :key="i"
-          class="flex items-center gap-3 p-2 rounded-md"
-        >
-          <USkeleton class="w-12 h-12 rounded-md bg-white/5" />
-
-          <div class="flex-1 space-y-2">
-            <USkeleton class="h-4 w-3/4 bg-white/5" />
-            <USkeleton class="h-3 w-1/2 bg-white/5" />
-          </div>
-        </div>
-      </div>
+      />
 
       <template v-else>
         <PlaylistCard
@@ -133,52 +135,10 @@ function handleCreatePlaylist() {
       </template>
     </div>
 
-    <BaseModal
+    <PlaylistCreateModal
       v-model="isModalOpen"
-      title="Criar playlist"
-      @close="isModalOpen = false"
-    >
-      <div class="space-y-6">
-        <div class="space-y-2">
-          <label
-            class="block text-xs font-bold text-text-muted uppercase tracking-wider"
-          >
-            Nome
-          </label>
-
-          <UInput
-            v-model="newPlaylistName"
-            placeholder="Minha playlist"
-            class="w-full"
-            variant="none"
-            :ui="{
-              base: 'bg-white/5 text-text-main border-transparent focus:ring-1 focus:ring-primary placeholder-text-dim rounded-md px-3 py-2',
-            }"
-          />
-        </div>
-
-        <UCheckbox
-          v-model="addRecommendations"
-          label="Adicionar músicas recomendadas"
-          color="primary"
-          class="cursor-pointer"
-          :ui="{
-            label: 'text-text-main cursor-pointer',
-            base: 'cursor-pointer',
-          }"
-        />
-      </div>
-
-      <template #footer>
-        <div class="flex justify-end">
-          <UButton
-            v-bind="primaryButton"
-            label="Criar"
-            class="px-6"
-            @click="handleCreatePlaylist"
-          />
-        </div>
-      </template>
-    </BaseModal>
+      :loading="isCreating"
+      @create="handleCreatePlaylist"
+    />
   </component>
 </template>

@@ -1,10 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&display=swap");
-@import "tailwindcss";
-@import "@nuxt/ui";
+@import url('https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&display=swap');
+@import 'tailwindcss';
+@import '@nuxt/ui';
 
 @theme static {
-  --font-sans: "Spline Sans", sans-serif;
-  --font-display: "Spline Sans", sans-serif;
+  --font-sans: 'Spline Sans', sans-serif;
+  --font-display: 'Spline Sans', sans-serif;
 
   /* Primary Brand Color */
   --color-primary: #38e07b;
@@ -12,9 +12,10 @@
   /* Backgrounds & Surfaces */
   --color-background: #122017; /* Main dark background */
   --color-surface-base: #121212; /* Chat header, Deepest surface */
-  --color-surface-elevated: #181818; /* Player bar */
-  --color-surface-highlight: #1e1e1e; /* Right sidebar */
-  --color-surface-card: #282828; /* Cards, Modals, Playlists */
+  --color-surface-elevated: #1e2b22; /* Player bar */
+  --color-surface-highlight: #2a372e; /* Right sidebar / Hover */
+  --color-surface-card: #1e2b22; /* Cards, Modals, Playlists */
+  --color-surface-dialog: #121212; /* Deep dark for modals */
   --color-surface-input: #3e3e3e; /* Form inputs */
 
   /* Text Colors */
