@@ -12,7 +12,7 @@ const props = defineProps<{
 const { playlists } = usePlaylists();
 const isPlaylistModalOpen = ref(false);
 const isSongSelectionModalOpen = ref(false);
-const selectedPlaylistId = ref<number | string | null>(null);
+const selectedPlaylistId = ref<number | null>(null);
 const selectedSongsIds = ref<Set<number>>(new Set());
 
 function openPlaylistSelection() {
@@ -20,7 +20,7 @@ function openPlaylistSelection() {
 }
 
 function selectPlaylist(id: number | string) {
-  selectedPlaylistId.value = id;
+  selectedPlaylistId.value = Number(id);
   isPlaylistModalOpen.value = false;
   selectedSongsIds.value = new Set(props.recommendations.map((t) => t.id));
   isSongSelectionModalOpen.value = true;
@@ -128,13 +128,16 @@ function toggleSong(id: number) {
               color="primary"
               @click.stop="toggleSong(track.id)"
             />
-            <img :src="track.image" class="w-10 h-10 rounded object-cover" />
+            <img
+              :src="track.image_url"
+              class="w-10 h-10 rounded object-cover"
+            />
             <div class="flex flex-col min-w-0">
               <span class="text-sm font-bold text-text-main truncate">{{
-                track.title
+                track.name
               }}</span>
               <span class="text-xs text-text-muted truncate">{{
-                track.artist
+                track.artists
               }}</span>
             </div>
           </div>

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { primaryButton } from '~/binds/buttons';
 
+defineProps<{
+  loading?: boolean;
+}>();
+
 defineEmits(['generate']);
 </script>
 
@@ -70,6 +74,7 @@ defineEmits(['generate']);
         v-bind="primaryButton"
         label="Gerar Recomendação"
         size="xl"
+        :loading="loading"
         class="px-8 py-3 text-lg font-bold min-w-[200px]"
         @click="$emit('generate')"
       />

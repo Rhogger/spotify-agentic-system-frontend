@@ -2,8 +2,10 @@
 import { primaryButton } from '~/binds/buttons';
 import InfoButton from '~/components/buttons/InfoButton.vue';
 import { useFilters } from '~/composables/useFilters';
+import { useRecommendations } from '~/composables/useRecommendations';
 
 const { filters } = useFilters();
+const { isLoading, fetchRecommendations } = useRecommendations();
 
 const decadeOptions = [
   '2020s',
@@ -23,9 +25,7 @@ const sliderLabels = {
   energy: 'Energia',
   danceability: 'Dançabilidade',
   valence: 'Valência',
-  speechiness: 'Vocalidade',
   acousticness: 'Acusticidade',
-  instrumentalness: 'Instrumentalidade',
 };
 
 type FilterKey = keyof typeof sliderLabels;
@@ -34,9 +34,7 @@ const tooltips: Record<string, string> = {
   energy: 'Medida de intensidade e atividade.',
   danceability: 'O quão adequada a faixa é para dançar.',
   valence: 'Positividade musical transmitida pela faixa.',
-  speechiness: 'Presença de palavras faladas na faixa.',
   acousticness: 'Confiança se a faixa é acústica.',
-  instrumentalness: 'Prevê se a faixa não contém vocais.',
 };
 </script>
 
@@ -126,8 +124,10 @@ const tooltips: Record<string, string> = {
     <UButton
       v-bind="primaryButton"
       label="Gerar recomendação"
+      :loading="isLoading"
       block
       class="my-4 font-bold text-black"
+      @click="fetchRecommendations"
     />
   </div>
 </template>

@@ -3,23 +3,32 @@ import type { Track } from '~/models/track';
 import { baseButton } from '~/binds/buttons';
 import PlayButton from '~/components/buttons/PlayButton.vue';
 
-defineProps<{
+const props = defineProps<{
   track: Track;
 }>();
+
+const formattedArtists = computed(() => {
+  try {
+    const parsed = JSON.parse(props.track.artists.replace(/'/g, '"'));
+    return Array.isArray(parsed) ? parsed.join(', ') : props.track.artists;
+  } catch {
+    return props.track.artists;
+  }
+});
 </script>
 
 <template>
-  <UPageCard
-    class="group cursor-pointer bg-surface-elevated/50 hover:bg-surface-card transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] border border-white/3 hover:border-white/8 min-w-[180px] max-w-[320px] mx-auto w-full"
+  <div
+    class="group cursor-pointer bg-surface-elevated/50 hover:bg-surface-card transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] border border-white/3 hover:border-white/8 rounded-xl p-3"
   >
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-3">
       <div
         class="relative w-full aspect-square overflow-hidden rounded-lg shadow-xl shadow-black/20"
       >
         <img
-          :src="track.image"
-          :alt="track.title"
-          class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+          :src="track.image_url"
+          :alt="track.name"
+          class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
 
         <div
@@ -37,36 +46,30 @@ defineProps<{
 
         <PlayButton
           size="lg"
-          :track-uri="track.uri || `spotify:track:${track.id}`"
+          :track-uri="`spotify:track:${track.spotify_id}`"
           class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-75 transform translate-y-4 group-hover:translate-y-0 shadow-[0_8px_24px_rgba(56,224,123,0.3)] hover:scale-110 active:scale-95"
         />
       </div>
 
-      <div class="flex flex-col min-w-0 pr-1">
+      <div class="flex flex-col min-w-0">
         <h3
-          class="font-bold text-text-main truncate text-base group-hover:text-primary transition-colors duration-300"
+          class="font-bold text-text-main truncate text-sm group-hover:text-primary transition-colors duration-300"
         >
-          {{ track.title }}
+          {{ track.name }}
         </h3>
 
-        <p class="text-sm font-medium text-text-muted truncate mt-0.5">
-          {{ track.artist }}
+        <p class="text-xs font-medium text-text-muted truncate mt-0.5">
+          {{ formattedArtists }}
         </p>
 
-        <div class="flex items-center gap-2 mt-2">
+        <div v-if="track.explicit" class="flex items-center mt-2">
           <span
             class="text-[10px] uppercase tracking-widest font-bold text-white/30 px-2 py-0.5 rounded-full border border-white/5 bg-white/2"
           >
-            {{ track.genre.split(',')[0] }}
+            Explícito
           </span>
         </div>
       </div>
     </div>
-  </UPageCard>
+  </div>
 </template>
-
-<style scoped>
-.ease-premium {
-  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
-}
-</style>
