@@ -36,11 +36,9 @@ onMounted(() => {
     <div
       class="flex flex-col h-screen overflow-hidden bg-background text-foreground"
     >
-      <div class="flex-1 overflow-hidden relative min-h-0">
-        <NuxtLayout>
-          <NuxtPage />
-        </NuxtLayout>
-      </div>
+      <NuxtLayout class="flex-1 min-h-0">
+        <NuxtPage />
+      </NuxtLayout>
 
       <div class="shrink-0 z-50">
         <AppPlayer v-if="token" />
