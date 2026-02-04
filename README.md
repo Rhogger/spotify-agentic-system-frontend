@@ -1,60 +1,81 @@
-# Nuxt Starter Template
+# Spotify Recs - Frontend
 
-[![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
+![Spotify Recs Preview](app/assets/images/preview.png)
 
-Use this template to get started with [Nuxt UI](https://ui.nuxt.com) quickly.
+Este repositório contém o código-fonte do frontend para o Sistema Agêntico do Spotify. A aplicação é construída com **Nuxt 4**, utilizando **Nuxt UI** para a interface e **TypeScript**.
 
-- [Live demo](https://starter-template.nuxt.dev/)
-- [Documentation](https://ui.nuxt.com/docs/getting-started/installation/nuxt)
+O objetivo deste frontend é fornecer uma interface moderna e responsiva para interagir com o sistema agêntico, permitindo aos usuários controlar a reprodução do Spotify, visualizar playlists e conversar com o assistente de IA.
 
-<a href="https://starter-template.nuxt.dev/" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png">
-    <img alt="Nuxt Starter Template" src="https://ui.nuxt.com/assets/templates/nuxt/starter-light.png">
-  </picture>
-</a>
+## 🚀 Tecnologias Utilizadas
 
-> The starter template for Vue is on https://github.com/nuxt-ui-templates/starter-vue.
+- **[Nuxt 4](https://nuxt.com/)**: Framework Vue.js para aplicações web modernas.
+- **[Nuxt UI](https://ui.nuxt.com/)**: Biblioteca de componentes baseada em Tailwind CSS.
+- **[Tailwind CSS](https://tailwindcss.com/)**: Framework de utilitários CSS.
+- **TypeScript**: Superset tipado de JavaScript.
+- **Axios**: Cliente HTTP para comunicação com a API.
+- **Icons**: Integração com Iconify (Lucide, Simple Icons).
 
-## Quick Start
+## ✨ Principais Funcionalidades
 
-```bash [Terminal]
-npm create nuxt@latest -- -t github:nuxt-ui-templates/starter
-```
+- **🎧 Player Integrado (Spotify SDK)**: Controle total de reprodução (play, pause, pular, volume) diretamente na interface, com feedback em tempo real do estado do player.
+- **💬 Chat Agêntico**: Interface conversacional para interagir com o assistente de IA, permitindo solicitar ações complexas em linguagem natural.
+- **📋 Gerenciamento de Playlists**: Criação, edição e visualização de playlists, com capacidade de adicionar ou remover faixas de forma intuitiva.
+- **🎵 Recomendação de Músicas**: Sistema inteligente de recomendação que utiliza IA para sugerir faixas baseadas no contexto e nas preferências do usuário.
+- **🔍 Navegação na Biblioteca**: Visualização de álbuns, artistas e faixas salvas, integrada com a busca do Spotify.
 
-## Deploy your own
+## 📦 Instalação e Execução
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-name=starter&repository-url=https%3A%2F%2Fgithub.com%2Fnuxt-ui-templates%2Fstarter&demo-image=https%3A%2F%2Fui.nuxt.com%2Fassets%2Ftemplates%2Fnuxt%2Fstarter-dark.png&demo-url=https%3A%2F%2Fstarter-template.nuxt.dev%2F&demo-title=Nuxt%20Starter%20Template&demo-description=A%20minimal%20template%20to%20get%20started%20with%20Nuxt%20UI.)
+### Via Docker (Recomendado)
 
-## Setup
+A execução principal deste serviço é orquestrada via Docker, garantindo que todo o ecossistema (backend, frontend, banco de dados) funcione em harmonia.
 
-Make sure to install the dependencies:
+Consulte o repositório de infraestrutura para instruções detalhadas:
 
-```bash
-pnpm install
-```
+👉 **[https://github.com/Rhogger/spotify-agentic-system-infra](https://github.com/Rhogger/spotify-agentic-system-infra)**
 
-## Development Server
+### Desenvolvimento Local
 
-Start the development server on `http://localhost:3000`:
+Para rodar o projeto localmente para desenvolvimento ou testes:
 
-```bash
-pnpm dev
-```
+#### Pré-requisitos
 
-## Production
+- Node.js (versão LTS recomendada)
+- pnpm (gerenciador de pacotes)
 
-Build the application for production:
+#### Passos
 
-```bash
-pnpm build
-```
+1. Instale as dependências:
+   ```bash
+   pnpm install
+   ```
 
-Locally preview production build:
+2. Configure as variáveis de ambiente (se necessário):
+   O frontend espera comunicar-se com a API. Por padrão, ele aponta para `http://localhost:8000`. Você pode alterar isso via variável de ambiente `NUXT_PUBLIC_API_BASE_URL`.
 
-```bash
-pnpm preview
-```
+3. Inicie o servidor de desenvolvimento:
+   ```bash
+   pnpm dev
+   ```
+   A aplicação estará disponível em `http://localhost:3000`.
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## 🛠️ Scripts Disponíveis
+
+- `pnpm dev`: Inicia o servidor de desenvolvimento com hot-reload.
+- `pnpm build`: Compila a aplicação para produção.
+- `pnpm preview`: Visualiza a versão de produção localmente.
+- `pnpm lint`: Executa o linter (ESLint) para verificar problemas no código.
+- `pnpm typecheck`: Executa a verificação de tipos do TypeScript.
+
+## 📂 Estrutura do Projeto
+
+O projeto segue a estrutura padrão do Nuxt 4 com `srcDir` configurado para `app/`:
+
+- `app/assets`: Arquivos estáticos (CSS, imagens).
+- `app/binds`: Configurações de injeção de dependência.
+- `app/components`: Componentes Vue reutilizáveis.
+- `app/composables`: Lógica reutilizável (Composition API).
+- `app/layouts`: Layouts da aplicação.
+- `app/models`: Interfaces e tipos TypeScript.
+- `app/pages`: Páginas da aplicação (roteamento automático).
+- `app/services`: Serviços para comunicação com APIs externas.
+- `nuxt.config.ts`: Arquivo de configuração principal do Nuxt.
