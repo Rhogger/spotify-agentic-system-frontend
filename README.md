@@ -49,8 +49,16 @@ Para rodar o projeto localmente para desenvolvimento ou testes:
    pnpm install
    ```
 
-2. Configure as variáveis de ambiente (se necessário):
-   O frontend espera comunicar-se com a API. Por padrão, ele aponta para `http://localhost:8000`. Você pode alterar isso via variável de ambiente `NUXT_PUBLIC_API_BASE_URL`.
+
+2. Configure as variáveis de ambiente:
+   Renomeie o arquivo `example.env` para `.env` na raiz do projeto e preencha as chaves necessárias:
+
+   | Variável | Descrição | Exemplo |
+   | :--- | :--- | :--- |
+   | `SPOTIFY_CLIENT_ID` | Client ID da sua aplicação Spotify Developer | `seu_client_id` |
+   | `SPOTIFY_CLIENT_SECRET` | Client Secret da sua aplicação Spotify Developer | `seu_client_secret` |
+   | `SPOTIFY_TOKEN_CALLBACK_URL` | URL de callback para autenticação OAuth (deve corresponder ao configurado no Spotify Dashboard) | `http://localhost:3001/auth/callback` |
+   | `NUXT_PUBLIC_API_BASE_URL` | URL base da API do Backend | `http://localhost:8000/api` |
 
 3. Inicie o servidor de desenvolvimento:
    ```bash
