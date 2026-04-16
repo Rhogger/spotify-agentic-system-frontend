@@ -82,7 +82,7 @@ function onCardUntilt(e: MouseEvent) {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <UCard
           v-for="(feature, i) in features"
-          :key="feature.title"
+          :key="i"
           class="reveal feat-card cursor-default bg-transparent ring-0! border-0 shadow-none [&>div]:p-8 [&>div]:sm:p-8 [&>div]:h-full [&>div]:flex [&>div]:flex-col"
           :class="`reveal-delay-${i}`"
           :style="{ '--accent': feature.accent }"
