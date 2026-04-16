@@ -33,7 +33,14 @@ onMounted(() => {
 
 <template>
   <UApp>
+    <template v-if="route.path === '/'">
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
+    </template>
+
     <div
+      v-else
       class="flex flex-col h-screen overflow-hidden bg-background text-foreground"
     >
       <NuxtLayout class="flex-1 min-h-0">

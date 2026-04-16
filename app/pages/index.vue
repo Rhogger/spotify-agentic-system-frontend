@@ -1,98 +1,333 @@
 <script setup lang="ts">
-import { useMouse } from '@vueuse/core';
-import { onMounted, onUnmounted, ref } from 'vue';
+import type { gsap } from 'gsap';
 
-definePageMeta({
-  layout: 'public',
-});
+definePageMeta({ layout: 'public' });
+
+const config = useRuntimeConfig();
 
 async function handleLogin() {
-  const config = useRuntimeConfig();
-  const baseURL =
+  const base =
     (config.public.apiBaseUrl as string) || 'http://localhost:8000/api';
-
-  const cleanBase = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
-
-  window.location.href = `${cleanBase}/auth/login`;
+  window.location.href = `${base.replace(/\/$/, '')}/auth/login`;
 }
 
-const { x: mouseX, y: mouseY } = useMouse();
+// ── Waveform ──────────────────────────────────────────────────────
+const bars = ref(Array.from({ length: 48 }, () => 0.2));
+const barsMirror = computed(() => [...bars.value].reverse());
+let waveRaf: number;
 
-const x = ref(0);
-const y = ref(0);
-
-let animationId: number;
-const lerpFactor = 0.1;
-
-function updatePosition() {
-  const dx = mouseX.value - x.value;
-  const dy = mouseY.value - y.value;
-
-  x.value += dx * lerpFactor;
-  y.value += dy * lerpFactor;
-
-  animationId = requestAnimationFrame(updatePosition);
+function animWave() {
+  const t = Date.now();
+  bars.value = bars.value.map((_, i) =>
+    Math.max(
+      0.08,
+      Math.abs(Math.sin(t / 700 + i * 0.85)) * 0.55 +
+        Math.abs(Math.sin(t / 420 + i * 1.9)) * 0.3,
+    ),
+  );
+  waveRaf = requestAnimationFrame(animWave);
 }
 
-onMounted(() => {
-  updatePosition();
+// ── Counters ──────────────────────────────────────────────────────
+const counters = ref([
+  { value: 0, target: 169, suffix: 'k+', label: 'músicas (1921–2020)' },
+  { value: 0, target: 100, suffix: 'k+', label: 'artistas' },
+  {
+    value: 0,
+    target: 0.007,
+    suffix: 'ms',
+    label: 'por recomendação',
+    decimals: 3,
+  },
+  { value: 0, target: 50, suffix: '%', label: 'taxa de descoberta' },
+]);
+
+// ── GSAP context ─────────────────────────────────────────────────
+let gsapCtx: gsap.Context | null = null;
+
+async function setupGSAP() {
+  const { gsap } = await import('gsap');
+  const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsapCtx = gsap.context(() => {
+    // ── 1. Hero title: characters fly in from below ───────────────
+    gsap.from('.hero-char', {
+      y: '115%',
+      opacity: 0,
+      duration: 0.65,
+      stagger: 0.022,
+      ease: 'power4.out',
+      delay: 0.08,
+    });
+    gsap.from('.hero-char-accent', {
+      y: '115%',
+      opacity: 0,
+      rotation: 5,
+      duration: 0.75,
+      stagger: 0.055,
+      ease: 'expo.out',
+      delay: 0.52,
+    });
+
+    // ── 2. Scroll reveals via ScrollTrigger (substitui IO) ────────
+    document.querySelectorAll('.reveal').forEach((el) => {
+      // Garante que o estado inicial seja opaco para compatibilidade
+      gsap.set(el, { opacity: 0, y: 40 });
+      gsap.to(el, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 86%',
+          toggleActions: 'play none none reverse',
+        },
+      });
+    });
+
+    // ── 3. Feature cards: stagger com rotateX ────────────────────
+    gsap.from('.feat-card', {
+      y: 70,
+      opacity: 0,
+      rotateX: 14,
+      stagger: { amount: 0.28, from: 'start' },
+      duration: 0.85,
+      ease: 'power3.out',
+      transformPerspective: 900,
+      scrollTrigger: {
+        trigger: '#features',
+        start: 'top 72%',
+        toggleActions: 'play none none none',
+      },
+    });
+
+    // ── 4. Counters scrubados ao scroll ──────────────────────────
+    counters.value.forEach((c) => {
+      ScrollTrigger.create({
+        trigger: '.stats-trigger',
+        start: 'top 80%',
+        end: 'bottom 30%',
+        scrub: 0.6,
+        onUpdate(self) {
+          const raw = self.progress * c.target;
+          c.value = c.decimals
+            ? parseFloat(raw.toFixed(c.decimals))
+            : Math.floor(raw);
+        },
+        onLeave() {
+          c.value = c.target;
+        },
+        onLeaveBack() {
+          c.value = 0;
+        },
+      });
+    });
+
+    // ── 5. Parallax dos orbs ──────────────────────────────────────
+    gsap.to('.orb-1', {
+      y: -160,
+      ease: 'none',
+      scrollTrigger: { scrub: 1.2, start: 'top top', end: 'bottom bottom' },
+    });
+    gsap.to('.orb-2', {
+      y: 120,
+      ease: 'none',
+      scrollTrigger: { scrub: 1.8, start: 'top top', end: 'bottom bottom' },
+    });
+    gsap.to('.orb-3', {
+      y: -80,
+      ease: 'none',
+      scrollTrigger: { scrub: 2.2, start: 'top top', end: 'bottom bottom' },
+    });
+
+    // ── 6. Equalizer overlay: hero → features ─────────────────────
+    const heroSection = document.querySelector<HTMLElement>(
+      '[data-section="hero"]',
+    );
+    const featSection = document.querySelector<HTMLElement>(
+      '[data-section="features"]',
+    );
+    const eqContainer =
+      document.querySelector<HTMLElement>('.hero-eq-container');
+
+    let eqHeight = 25; // vh
+
+    if (heroSection && featSection && eqContainer) {
+      eqContainer.style.height = '25vh';
+      eqContainer.style.zIndex = '10';
+
+      ScrollTrigger.create({
+        trigger: heroSection,
+        start: 'bottom bottom',
+        end: '+=1500',
+        pin: true,
+        scrub: 1,
+        onUpdate(self) {
+          eqHeight = 25 + self.progress * 75;
+          eqContainer.style.height = `${eqHeight}vh`;
+          eqContainer.style.zIndex = '50';
+        },
+        onLeave(self) {
+          eqHeight = 100;
+          eqContainer.style.height = '100vh';
+          eqContainer.style.zIndex = '50';
+        },
+        onLeaveBack(self) {
+          eqHeight = 100;
+          eqContainer.style.height = '100vh';
+        },
+      });
+
+      ScrollTrigger.create({
+        trigger: featSection,
+        start: 'top bottom',
+        end: 'top top',
+        scrub: 1,
+        onUpdate(self) {
+          eqHeight = 100 * (1 - self.progress);
+          eqContainer.style.height = `${eqHeight}vh`;
+          eqContainer.style.zIndex = self.progress < 0.3 ? '50' : '10';
+        },
+      });
+    }
+  });
+}
+
+onMounted(async () => {
+  animWave();
+  await setupGSAP();
 });
 
 onUnmounted(() => {
-  cancelAnimationFrame(animationId);
+  cancelAnimationFrame(waveRaf);
+  gsapCtx?.revert();
 });
 </script>
 
 <template>
   <div
-    class="relative flex flex-col items-center justify-center min-h-screen bg-[#051c10] text-text-main overflow-hidden selection:bg-primary selection:text-black"
+    class="lp-root bg-[#0b1810] text-white"
+    style="font-family: 'Spline Sans', sans-serif"
   >
-    <div class="absolute inset-0 z-0 opacity-40 pointer-events-none grid-bg" />
-
-    <div
-      class="absolute inset-0 z-0 pointer-events-none"
-      :style="{
-        background: `radial-gradient(600px circle at ${x}px ${y}px, rgba(56, 224, 123, 0.15), transparent 40%)`,
-      }"
-    ></div>
-
-    <div class="z-10 flex flex-col items-center gap-8 relative">
-      <div
-        class="flex flex-col items-center gap-4 animate-in fade-in zoom-in duration-700"
-      >
-        <div
-          class="w-24 h-24 rounded-full bg-black/40 flex items-center justify-center border border-white/10 shadow-[0_0_50px_rgba(56,224,123,0.2)] backdrop-blur-md"
-        >
-          <UIcon name="i-simple-icons-spotify" class="w-14 h-14 text-primary" />
-        </div>
-
-        <h1
-          class="text-5xl font-black tracking-tight text-white drop-shadow-[0_0_15px_rgba(56,224,123,0.5)]"
-        >
-          Spotify <span class="text-primary">Recs</span>
-        </h1>
-
-        <p class="text-text-muted text-lg font-medium tracking-wide">
-          Descubra novas músicas com o poder da IA
-        </p>
-      </div>
-
-      <UButton
-        label="Entrar com o Spotify"
-        color="primary"
-        size="xl"
-        class="font-bold text-black px-12 py-4 rounded-full hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(56,224,123,0.4)] hover:shadow-[0_0_40px_rgba(56,224,123,0.6)] ring-1 ring-white/20 active:scale-95"
-        @click="handleLogin"
-      />
+    <!-- ── ORBS ── -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <div class="orb orb-1" />
+      <div class="orb orb-2" />
+      <div class="orb orb-3" />
     </div>
+
+    <!-- ── GRID ── -->
+    <div class="lp-grid pointer-events-none" aria-hidden="true" />
+
+    <LandingNav @login="handleLogin" />
+
+    <LandingHero @login="handleLogin" />
+
+    <LandingEqualizer :bars="bars" />
+
+    <LandingFeatures />
+
+    <!-- <LandingCatalog :counters="counters" /> -->
+
+    <!-- <LandingDemo /> -->
+
+    <!-- <LandingChatDemo /> -->
+
+    <!-- <LandingCta :bars="bars" :barsMirror="barsMirror" @login="handleLogin" /> -->
+
+    <LandingFooter />
   </div>
 </template>
 
 <style scoped>
-.grid-bg {
-  background-size: 40px 40px;
+/* ── Root ── */
+.lp-root {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* ── Grid: repeating-linear-gradient para linhas exatas (sem subpixel gaps) ── */
+.lp-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 51px,
+      rgba(56, 224, 123, 0.045) 51px,
+      rgba(56, 224, 123, 0.045) 52px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 51px,
+      rgba(56, 224, 123, 0.045) 51px,
+      rgba(56, 224, 123, 0.045) 52px
+    );
+  transform: translateZ(0);
+  will-change: unset;
+}
+
+/* ── Orbs ── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  will-change: transform;
+  pointer-events: none;
+}
+.orb-1 {
+  width: 620px;
+  height: 620px;
+  background: radial-gradient(
+    circle,
+    rgba(56, 224, 123, 0.2) 0%,
+    transparent 70%
+  );
+  top: -20%;
+  left: -15%;
+  animation: drift 28s ease-in-out infinite;
+}
+.orb-2 {
+  width: 460px;
+  height: 460px;
+  background: radial-gradient(
+    circle,
+    rgba(124, 106, 247, 0.18) 0%,
+    transparent 70%
+  );
+  top: 35%;
+  right: -12%;
+  animation: drift 22s ease-in-out infinite reverse;
+  animation-delay: -7s;
+}
+.orb-3 {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(
+    circle,
+    rgba(56, 224, 123, 0.12) 0%,
+    transparent 70%
+  );
+  bottom: 8%;
+  left: 20%;
+  animation: drift 36s ease-in-out infinite;
+  animation-delay: -15s;
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(40px, -50px);
+  }
+  66% {
+    transform: translate(-30px, 40px);
+  }
 }
 </style>
