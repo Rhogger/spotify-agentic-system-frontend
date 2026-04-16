@@ -149,15 +149,19 @@ async function setupGSAP() {
     const featSection = document.querySelector<HTMLElement>(
       '[data-section="features"]',
     );
-    const eqContainer =
-      document.querySelector<HTMLElement>('.hero-eq-container');
+    const eqWrapper =
+      document.querySelector<HTMLElement>('.hero-eq-wrapper');
 
-    let eqHeight = 25; // vh
+    const heroDarken =
+      document.querySelector<HTMLElement>('.hero-darken');
 
-    if (heroSection && featSection && eqContainer) {
-      eqContainer.style.height = '25vh';
-      eqContainer.style.zIndex = '10';
+    if (heroSection && featSection && eqWrapper && heroDarken) {
+      // Estado inicial
+      gsap.set(eqWrapper, { height: '25vh', zIndex: 30, y: 0 });
+      gsap.set(heroDarken, { opacity: 0 });
 
+      // Phase 1: Pin hero, EQ cresce de 25vh → 100vh cobrindo a tela
+      // hero-darken escurece o conteúdo progressivamente POR BAIXO do EQ
       ScrollTrigger.create({
         trigger: heroSection,
         start: 'bottom bottom',
@@ -165,30 +169,47 @@ async function setupGSAP() {
         pin: true,
         scrub: 1,
         onUpdate(self) {
-          eqHeight = 25 + self.progress * 75;
-          eqContainer.style.height = `${eqHeight}vh`;
-          eqContainer.style.zIndex = '50';
+          const h = 25 + self.progress * 75;
+          eqWrapper.style.height = `${h}vh`;
+          eqWrapper.style.zIndex = '30';
+          heroDarken.style.opacity = `${self.progress}`;
         },
-        onLeave(self) {
-          eqHeight = 100;
-          eqContainer.style.height = '100vh';
-          eqContainer.style.zIndex = '50';
+        onLeave() {
+          eqWrapper.style.height = '100vh';
+          eqWrapper.style.zIndex = '30';
+          heroDarken.style.opacity = '1';
         },
-        onLeaveBack(self) {
-          eqHeight = 100;
-          eqContainer.style.height = '100vh';
+        onLeaveBack() {
+          eqWrapper.style.height = '25vh';
+          eqWrapper.style.zIndex = '30';
+          eqWrapper.style.transform = 'translateY(0)';
+          heroDarken.style.opacity = '0';
         },
       });
 
+      // Phase 2: EQ desliza pra cima via translateY
+      // hero-darken faz fade out pra revelar features
       ScrollTrigger.create({
         trigger: featSection,
         start: 'top bottom',
         end: 'top top',
         scrub: 1,
         onUpdate(self) {
-          eqHeight = 100 * (1 - self.progress);
-          eqContainer.style.height = `${eqHeight}vh`;
-          eqContainer.style.zIndex = self.progress < 0.3 ? '50' : '10';
+          const slideUp = self.progress * 130;
+          eqWrapper.style.transform = `translateY(-${slideUp}vh)`;
+          eqWrapper.style.zIndex = self.progress < 0.85 ? '30' : '5';
+          // Fade out do overlay escuro
+          heroDarken.style.opacity = `${1 - self.progress}`;
+        },
+        onLeave() {
+          eqWrapper.style.transform = 'translateY(-130vh)';
+          eqWrapper.style.zIndex = '0';
+          heroDarken.style.opacity = '0';
+        },
+        onLeaveBack() {
+          eqWrapper.style.transform = 'translateY(0)';
+          eqWrapper.style.zIndex = '30';
+          heroDarken.style.opacity = '1';
         },
       });
     }
@@ -224,6 +245,12 @@ onUnmounted(() => {
     <LandingNav @login="handleLogin" />
 
     <LandingHero @login="handleLogin" />
+
+    <!-- Overlay escuro: z-index entre hero (z-10) e EQ (z-30) -->
+    <div
+      class="hero-darken fixed inset-0 z-20 bg-[#0b1810] pointer-events-none"
+      style="opacity: 0"
+    />
 
     <LandingEqualizer :bars="bars" />
 

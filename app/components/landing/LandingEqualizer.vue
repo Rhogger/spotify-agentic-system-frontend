@@ -21,22 +21,45 @@ watch(
   },
   { immediate: true },
 );
+
+function barBg(i: number, h: number): string {
+  const hue = barHues.value[i] || 144;
+  return `hsl(${hue}, 65%, ${28 + h * 28}%)`;
+}
 </script>
 
 <template>
   <div
-    class="hero-eq-container fixed flex flex-row items-end bottom-0 inset-x-0 z-0 h-[25vh] overflow-visible pointer-events-none"
+    class="hero-eq-wrapper fixed inset-x-0 bottom-0 z-0 pointer-events-none"
+    style="height: 25vh"
   >
+    <!-- Barras superiores (crescem pra cima), sem background -->
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="flex items-end w-full h-full gap-[1.5px]">
+        <div
+          v-for="(h, i) in props.bars"
+          :key="`eq-top-${i}`"
+          class="flex-1 rounded-t-sm transition-[height] duration-75 will-change-[height]"
+          :style="{
+            height: `${Math.max(6, h * 100)}%`,
+            background: barBg(i, h),
+          }"
+        />
+      </div>
+    </div>
+
+    <!-- Barras espelhadas abaixo do wrapper -->
     <div
-      class="flex items-end w-full h-full gap-[1.5px] overflow-visible pointer-events-auto"
+      class="absolute top-full inset-x-0 flex items-start gap-[1.5px]"
+      style="height: 30vh"
     >
       <div
         v-for="(h, i) in props.bars"
-        :key="`hero-eq-${i}`"
-        class="flex-1 rounded-t-sm transition-all duration-75"
+        :key="`eq-bot-${i}`"
+        class="flex-1 rounded-b-sm transition-[height] duration-75 will-change-[height]"
         :style="{
           height: `${Math.max(6, h * 100)}%`,
-          background: `hsl(${barHues[i] || 144}, 65%, ${28 + h * 28}%)`,
+          background: barBg(i, h),
         }"
       />
     </div>
@@ -44,7 +67,7 @@ watch(
 </template>
 
 <style scoped>
-.hero-eq-container {
+.hero-eq-wrapper {
   will-change: height, transform;
 }
 </style>
