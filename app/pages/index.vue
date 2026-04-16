@@ -143,25 +143,29 @@ async function setupGSAP() {
     });
 
     // ── 6. Equalizer overlay: hero → features ─────────────────────
+    // O EQ é uma peça de 150vh (75vh top + 75vh mirror).
+    // fixed bottom:0 + height:150vh → top fica em -50vh.
+    // translateY controla a posição:
+    //   125vh → só 25vh visível no bottom (estado inicial)
+    //    50vh → 100vh visível (cobre a tela inteira)
+    //  -100vh → saiu completamente pelo topo
     const heroSection = document.querySelector<HTMLElement>(
       '[data-section="hero"]',
     );
     const featSection = document.querySelector<HTMLElement>(
       '[data-section="features"]',
     );
-    const eqWrapper =
-      document.querySelector<HTMLElement>('.hero-eq-wrapper');
-
-    const heroDarken =
-      document.querySelector<HTMLElement>('.hero-darken');
+    const eqWrapper = document.querySelector<HTMLElement>('.hero-eq-wrapper');
+    const heroDarken = document.querySelector<HTMLElement>('.hero-darken');
+    const heroParticles = document.querySelector<HTMLElement>('.hero-particles-layer');
 
     if (heroSection && featSection && eqWrapper && heroDarken) {
       // Estado inicial
-      gsap.set(eqWrapper, { height: '25vh', zIndex: 30, y: 0 });
+      gsap.set(eqWrapper, { y: '125vh', zIndex: 30 });
       gsap.set(heroDarken, { opacity: 0 });
 
-      // Phase 1: Pin hero, EQ cresce de 25vh → 100vh cobrindo a tela
-      // hero-darken escurece o conteúdo progressivamente POR BAIXO do EQ
+      // Phase 1: Pin hero, EQ sobe de 25vh visível → 100vh (tela cheia)
+      // Overlay escurece o hero por trás progressivamente
       ScrollTrigger.create({
         trigger: heroSection,
         start: 'bottom bottom',
@@ -169,47 +173,65 @@ async function setupGSAP() {
         pin: true,
         scrub: 1,
         onUpdate(self) {
-          const h = 25 + self.progress * 75;
-          eqWrapper.style.height = `${h}vh`;
+          // translateY: 125 → 50 (75vh de deslocamento)
+          const ty = 125 - self.progress * 75;
+          eqWrapper.style.transform = `translateY(${ty}vh)`;
           eqWrapper.style.zIndex = '30';
           heroDarken.style.opacity = `${self.progress}`;
+          eqWrapper.style.setProperty(
+            '--eq-intensity',
+            self.progress.toString(),
+          );
+          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', self.progress.toString());
         },
         onLeave() {
-          eqWrapper.style.height = '100vh';
+          eqWrapper.style.transform = 'translateY(50vh)';
           eqWrapper.style.zIndex = '30';
           heroDarken.style.opacity = '1';
+          eqWrapper.style.setProperty('--eq-intensity', '1');
+          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', '1');
         },
         onLeaveBack() {
-          eqWrapper.style.height = '25vh';
+          eqWrapper.style.transform = 'translateY(125vh)';
           eqWrapper.style.zIndex = '30';
-          eqWrapper.style.transform = 'translateY(0)';
           heroDarken.style.opacity = '0';
+          eqWrapper.style.setProperty('--eq-intensity', '0');
+          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', '0');
         },
       });
 
-      // Phase 2: EQ desliza pra cima via translateY
-      // hero-darken faz fade out pra revelar features
+      // Phase 2: EQ continua subindo, passando pelo centro,
+      // mostrando as barras espelhadas. Overlay faz fade out.
       ScrollTrigger.create({
         trigger: featSection,
         start: 'top bottom',
         end: 'top top',
         scrub: 1,
         onUpdate(self) {
-          const slideUp = self.progress * 130;
-          eqWrapper.style.transform = `translateY(-${slideUp}vh)`;
+          // translateY: 50 → -100 (150vh de deslocamento)
+          const ty = 50 - self.progress * 150;
+          eqWrapper.style.transform = `translateY(${ty}vh)`;
           eqWrapper.style.zIndex = self.progress < 0.85 ? '30' : '5';
-          // Fade out do overlay escuro
           heroDarken.style.opacity = `${1 - self.progress}`;
+          eqWrapper.style.setProperty(
+            '--eq-intensity',
+            (1 - self.progress).toString(),
+          );
+          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', (1 - self.progress).toString());
         },
         onLeave() {
-          eqWrapper.style.transform = 'translateY(-130vh)';
+          eqWrapper.style.transform = 'translateY(-100vh)';
           eqWrapper.style.zIndex = '0';
           heroDarken.style.opacity = '0';
+          eqWrapper.style.setProperty('--eq-intensity', '0');
+          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', '0');
         },
         onLeaveBack() {
-          eqWrapper.style.transform = 'translateY(0)';
+          eqWrapper.style.transform = 'translateY(50vh)';
           eqWrapper.style.zIndex = '30';
           heroDarken.style.opacity = '1';
+          eqWrapper.style.setProperty('--eq-intensity', '1');
+          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', '1');
         },
       });
     }
@@ -245,12 +267,6 @@ onUnmounted(() => {
     <LandingNav @login="handleLogin" />
 
     <LandingHero @login="handleLogin" />
-
-    <!-- Overlay escuro: z-index entre hero (z-10) e EQ (z-30) -->
-    <div
-      class="hero-darken fixed inset-0 z-20 bg-[#0b1810] pointer-events-none"
-      style="opacity: 0"
-    />
 
     <LandingEqualizer :bars="bars" />
 

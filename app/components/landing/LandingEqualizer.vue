@@ -29,36 +29,40 @@ function barBg(i: number, h: number): string {
 </script>
 
 <template>
+  <!--
+    Wrapper 150vh: posicionado fixed bottom:0.
+    GSAP controla translateY para deslizar pelo viewport.
+    --eq-intensity (0 a 1) força as barras a 100% via transform: scaleY
+  -->
   <div
     class="hero-eq-wrapper fixed inset-x-0 bottom-0 z-0 pointer-events-none"
-    style="height: 25vh"
+    style="height: 150vh; transform: translateY(125vh); --eq-intensity: 0"
   >
-    <!-- Barras superiores (crescem pra cima), sem background -->
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="flex items-end w-full h-full gap-[1.5px]">
-        <div
-          v-for="(h, i) in props.bars"
-          :key="`eq-top-${i}`"
-          class="flex-1 rounded-t-sm transition-[height] duration-75 will-change-[height]"
-          :style="{
-            height: `${Math.max(6, h * 100)}%`,
-            background: barBg(i, h),
-          }"
-        />
-      </div>
+    <!-- Metade superior (75vh): barras crescem pra cima -->
+    <div class="flex items-end w-full gap-[1.5px]" style="height: 75vh">
+      <div
+        v-for="(h, i) in props.bars"
+        :key="`eq-top-${i}`"
+        class="flex-1 rounded-t-sm transition-transform duration-100 will-change-transform"
+        :style="{
+          height: '100%',
+          transformOrigin: 'bottom',
+          transform: `scaleY(calc(max(0.06, ${h}) * (1 - var(--eq-intensity, 0)) + 1 * var(--eq-intensity, 0)))`,
+          background: barBg(i, h),
+        }"
+      />
     </div>
 
-    <!-- Barras espelhadas abaixo do wrapper -->
-    <div
-      class="absolute top-full inset-x-0 flex items-start gap-[1.5px]"
-      style="height: 30vh"
-    >
+    <!-- Metade inferior (75vh): barras espelhadas, crescem pra baixo -->
+    <div class="flex items-start w-full gap-[1.5px]" style="height: 75vh">
       <div
         v-for="(h, i) in props.bars"
         :key="`eq-bot-${i}`"
-        class="flex-1 rounded-b-sm transition-[height] duration-75 will-change-[height]"
+        class="flex-1 rounded-b-sm transition-transform duration-100 will-change-transform"
         :style="{
-          height: `${Math.max(6, h * 100)}%`,
+          height: '100%',
+          transformOrigin: 'top',
+          transform: `scaleY(calc(max(0.06, ${h}) * (1 - var(--eq-intensity, 0)) + 1 * var(--eq-intensity, 0)))`,
           background: barBg(i, h),
         }"
       />
@@ -68,6 +72,6 @@ function barBg(i: number, h: number): string {
 
 <style scoped>
 .hero-eq-wrapper {
-  will-change: height, transform;
+  will-change: transform;
 }
 </style>

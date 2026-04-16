@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import HeroParticles from './HeroParticles.vue';
+import LandingSonar from './LandingSonar.vue';
+import LandingRain from './LandingRain.vue';
 
 defineEmits<{ (e: 'login'): void }>();
 
@@ -12,7 +13,7 @@ const heroLine2 = 'ouvir.'.split('');
     data-section="hero"
     class="relative h-screen flex flex-col pt-[64px]"
   >
-    <HeroParticles class="absolute inset-0 z-0" />
+    <LandingSonar class="absolute inset-0 z-0" />
 
     <div class="relative z-10 flex-1 flex flex-col">
       <div
@@ -106,6 +107,8 @@ const heroLine2 = 'ouvir.'.split('');
         </div>
       </div>
     </div>
+
+    <LandingRain />
   </section>
 </template>
 
@@ -184,4 +187,5 @@ const heroLine2 = 'ouvir.'.split('');
 [data-section='hero'] {
   overflow: visible;
 }
+
 </style>
