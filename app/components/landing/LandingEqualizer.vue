@@ -29,16 +29,10 @@ function barBg(i: number, h: number): string {
 </script>
 
 <template>
-  <!--
-    Wrapper 150vh: posicionado fixed bottom:0.
-    GSAP controla translateY para deslizar pelo viewport.
-    --eq-intensity (0 a 1) força as barras a 100% via transform: scaleY
-  -->
   <div
-    class="hero-eq-wrapper fixed inset-x-0 bottom-0 z-0 pointer-events-none"
+    class="hero-eq-wrapper fixed inset-x-0 bottom-0 z-40 pointer-events-none"
     style="height: 150vh; transform: translateY(125vh); --eq-intensity: 0"
   >
-    <!-- Metade superior (75vh): barras crescem pra cima -->
     <div class="flex items-end w-full gap-[1.5px]" style="height: 75vh">
       <div
         v-for="(h, i) in props.bars"
@@ -53,7 +47,6 @@ function barBg(i: number, h: number): string {
       />
     </div>
 
-    <!-- Metade inferior (75vh): barras espelhadas, crescem pra baixo -->
     <div class="flex items-start w-full gap-[1.5px]" style="height: 75vh">
       <div
         v-for="(h, i) in props.bars"

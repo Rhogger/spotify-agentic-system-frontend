@@ -1,252 +1,14 @@
 <script setup lang="ts">
-import type { gsap } from 'gsap';
-
 definePageMeta({ layout: 'public' });
 
 const config = useRuntimeConfig();
+const { bars, barsMirror, counters } = useLandingAnimations();
 
-async function handleLogin() {
+async function handleLogin(): Promise<void> {
   const base =
     (config.public.apiBaseUrl as string) || 'http://localhost:8000/api';
   window.location.href = `${base.replace(/\/$/, '')}/auth/login`;
 }
-
-// ── Waveform ──────────────────────────────────────────────────────
-const bars = ref(Array.from({ length: 48 }, () => 0.2));
-const barsMirror = computed(() => [...bars.value].reverse());
-let waveRaf: number;
-
-function animWave() {
-  const t = Date.now();
-  bars.value = bars.value.map((_, i) =>
-    Math.max(
-      0.08,
-      Math.abs(Math.sin(t / 700 + i * 0.85)) * 0.55 +
-        Math.abs(Math.sin(t / 420 + i * 1.9)) * 0.3,
-    ),
-  );
-  waveRaf = requestAnimationFrame(animWave);
-}
-
-// ── Counters ──────────────────────────────────────────────────────
-const counters = ref([
-  { value: 0, target: 169, suffix: 'k+', label: 'músicas (1921–2020)' },
-  { value: 0, target: 100, suffix: 'k+', label: 'artistas' },
-  {
-    value: 0,
-    target: 0.007,
-    suffix: 'ms',
-    label: 'por recomendação',
-    decimals: 3,
-  },
-  { value: 0, target: 50, suffix: '%', label: 'taxa de descoberta' },
-]);
-
-// ── GSAP context ─────────────────────────────────────────────────
-let gsapCtx: gsap.Context | null = null;
-
-async function setupGSAP() {
-  const { gsap } = await import('gsap');
-  const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-  gsap.registerPlugin(ScrollTrigger);
-
-  gsapCtx = gsap.context(() => {
-    // ── 1. Hero title: characters fly in from below ───────────────
-    gsap.from('.hero-char', {
-      y: '115%',
-      opacity: 0,
-      duration: 0.65,
-      stagger: 0.022,
-      ease: 'power4.out',
-      delay: 0.08,
-    });
-    gsap.from('.hero-char-accent', {
-      y: '115%',
-      opacity: 0,
-      rotation: 5,
-      duration: 0.75,
-      stagger: 0.055,
-      ease: 'expo.out',
-      delay: 0.52,
-    });
-
-    // ── 2. Scroll reveals via ScrollTrigger (substitui IO) ────────
-    document.querySelectorAll('.reveal').forEach((el) => {
-      // Garante que o estado inicial seja opaco para compatibilidade
-      gsap.set(el, { opacity: 0, y: 40 });
-      gsap.to(el, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 86%',
-          toggleActions: 'play none none reverse',
-        },
-      });
-    });
-
-    // ── 3. Feature cards: stagger com rotateX ────────────────────
-    gsap.from('.feat-card', {
-      y: 70,
-      opacity: 0,
-      rotateX: 14,
-      stagger: { amount: 0.28, from: 'start' },
-      duration: 0.85,
-      ease: 'power3.out',
-      transformPerspective: 900,
-      scrollTrigger: {
-        trigger: '#features',
-        start: 'top 72%',
-        toggleActions: 'play none none none',
-      },
-    });
-
-    // ── 4. Counters scrubados ao scroll ──────────────────────────
-    counters.value.forEach((c) => {
-      ScrollTrigger.create({
-        trigger: '.stats-trigger',
-        start: 'top 80%',
-        end: 'bottom 30%',
-        scrub: 0.6,
-        onUpdate(self) {
-          const raw = self.progress * c.target;
-          c.value = c.decimals
-            ? parseFloat(raw.toFixed(c.decimals))
-            : Math.floor(raw);
-        },
-        onLeave() {
-          c.value = c.target;
-        },
-        onLeaveBack() {
-          c.value = 0;
-        },
-      });
-    });
-
-    // ── 5. Parallax dos orbs ──────────────────────────────────────
-    gsap.to('.orb-1', {
-      y: -160,
-      ease: 'none',
-      scrollTrigger: { scrub: 1.2, start: 'top top', end: 'bottom bottom' },
-    });
-    gsap.to('.orb-2', {
-      y: 120,
-      ease: 'none',
-      scrollTrigger: { scrub: 1.8, start: 'top top', end: 'bottom bottom' },
-    });
-    gsap.to('.orb-3', {
-      y: -80,
-      ease: 'none',
-      scrollTrigger: { scrub: 2.2, start: 'top top', end: 'bottom bottom' },
-    });
-
-    // ── 6. Equalizer overlay: hero → features ─────────────────────
-    // O EQ é uma peça de 150vh (75vh top + 75vh mirror).
-    // fixed bottom:0 + height:150vh → top fica em -50vh.
-    // translateY controla a posição:
-    //   125vh → só 25vh visível no bottom (estado inicial)
-    //    50vh → 100vh visível (cobre a tela inteira)
-    //  -100vh → saiu completamente pelo topo
-    const heroSection = document.querySelector<HTMLElement>(
-      '[data-section="hero"]',
-    );
-    const featSection = document.querySelector<HTMLElement>(
-      '[data-section="features"]',
-    );
-    const eqWrapper = document.querySelector<HTMLElement>('.hero-eq-wrapper');
-    const heroDarken = document.querySelector<HTMLElement>('.hero-darken');
-    const heroParticles = document.querySelector<HTMLElement>('.hero-particles-layer');
-
-    if (heroSection && featSection && eqWrapper && heroDarken) {
-      // Estado inicial
-      gsap.set(eqWrapper, { y: '125vh', zIndex: 30 });
-      gsap.set(heroDarken, { opacity: 0 });
-
-      // Phase 1: Pin hero, EQ sobe de 25vh visível → 100vh (tela cheia)
-      // Overlay escurece o hero por trás progressivamente
-      ScrollTrigger.create({
-        trigger: heroSection,
-        start: 'bottom bottom',
-        end: '+=1500',
-        pin: true,
-        scrub: 1,
-        onUpdate(self) {
-          // translateY: 125 → 50 (75vh de deslocamento)
-          const ty = 125 - self.progress * 75;
-          eqWrapper.style.transform = `translateY(${ty}vh)`;
-          eqWrapper.style.zIndex = '30';
-          heroDarken.style.opacity = `${self.progress}`;
-          eqWrapper.style.setProperty(
-            '--eq-intensity',
-            self.progress.toString(),
-          );
-          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', self.progress.toString());
-        },
-        onLeave() {
-          eqWrapper.style.transform = 'translateY(50vh)';
-          eqWrapper.style.zIndex = '30';
-          heroDarken.style.opacity = '1';
-          eqWrapper.style.setProperty('--eq-intensity', '1');
-          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', '1');
-        },
-        onLeaveBack() {
-          eqWrapper.style.transform = 'translateY(125vh)';
-          eqWrapper.style.zIndex = '30';
-          heroDarken.style.opacity = '0';
-          eqWrapper.style.setProperty('--eq-intensity', '0');
-          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', '0');
-        },
-      });
-
-      // Phase 2: EQ continua subindo, passando pelo centro,
-      // mostrando as barras espelhadas. Overlay faz fade out.
-      ScrollTrigger.create({
-        trigger: featSection,
-        start: 'top bottom',
-        end: 'top top',
-        scrub: 1,
-        onUpdate(self) {
-          // translateY: 50 → -100 (150vh de deslocamento)
-          const ty = 50 - self.progress * 150;
-          eqWrapper.style.transform = `translateY(${ty}vh)`;
-          eqWrapper.style.zIndex = self.progress < 0.85 ? '30' : '5';
-          heroDarken.style.opacity = `${1 - self.progress}`;
-          eqWrapper.style.setProperty(
-            '--eq-intensity',
-            (1 - self.progress).toString(),
-          );
-          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', (1 - self.progress).toString());
-        },
-        onLeave() {
-          eqWrapper.style.transform = 'translateY(-100vh)';
-          eqWrapper.style.zIndex = '0';
-          heroDarken.style.opacity = '0';
-          eqWrapper.style.setProperty('--eq-intensity', '0');
-          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', '0');
-        },
-        onLeaveBack() {
-          eqWrapper.style.transform = 'translateY(50vh)';
-          eqWrapper.style.zIndex = '30';
-          heroDarken.style.opacity = '1';
-          eqWrapper.style.setProperty('--eq-intensity', '1');
-          if (heroParticles) heroParticles.style.setProperty('--rain-intensity', '1');
-        },
-      });
-    }
-  });
-}
-
-onMounted(async () => {
-  animWave();
-  await setupGSAP();
-});
-
-onUnmounted(() => {
-  cancelAnimationFrame(waveRaf);
-  gsapCtx?.revert();
-});
 </script>
 
 <template>
@@ -254,14 +16,12 @@ onUnmounted(() => {
     class="lp-root bg-[#0b1810] text-white"
     style="font-family: 'Spline Sans', sans-serif"
   >
-    <!-- ── ORBS ── -->
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
       <div class="orb orb-1" />
       <div class="orb orb-2" />
       <div class="orb orb-3" />
     </div>
 
-    <!-- ── GRID ── -->
     <div class="lp-grid pointer-events-none" aria-hidden="true" />
 
     <LandingNav @login="handleLogin" />
@@ -285,13 +45,11 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* ── Root ── */
 .lp-root {
   position: relative;
   min-height: 100vh;
 }
 
-/* ── Grid: repeating-linear-gradient para linhas exatas (sem subpixel gaps) ── */
 .lp-grid {
   position: fixed;
   inset: 0;
@@ -315,7 +73,6 @@ onUnmounted(() => {
   will-change: unset;
 }
 
-/* ── Orbs ── */
 .orb {
   position: absolute;
   border-radius: 50%;

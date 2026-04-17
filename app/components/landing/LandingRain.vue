@@ -1,8 +1,7 @@
 <script setup lang="ts">
-// Pingos de chuva (multiplicados para 160 gotas)
 const drops = Array.from({ length: 160 }, (_, i) => ({
   id: i,
-  x: Math.round((i / 160) * 98 + Math.random() * 2), // Distribui todos eles de ponta a ponta
+  x: Math.round((i / 160) * 98 + Math.random() * 2),
   delay: parseFloat(((i * 0.19) % 4).toFixed(2)),
   duration: parseFloat((1.4 + (i % 7) * 0.18).toFixed(2)),
   opacity: parseFloat((0.06 + (i % 5) * 0.02).toFixed(2)),
@@ -11,15 +10,13 @@ const drops = Array.from({ length: 160 }, (_, i) => ({
 </script>
 
 <template>
-  <!-- Overlay escuro -->
   <div
-    class="hero-darken absolute inset-0 z-[15] pointer-events-none bg-[#0b1810]"
+    class="hero-darken absolute inset-0 z-15 pointer-events-none bg-[#0b1810]"
     style="opacity: 0"
   />
 
-  <!-- Chuva em Z-20 -->
   <div
-    class="hero-particles-layer absolute inset-0 z-[20] pointer-events-none overflow-hidden"
+    class="hero-particles-layer absolute inset-0 z-20 pointer-events-none overflow-hidden"
     aria-hidden="true"
     style="--rain-intensity: 0"
   >
@@ -49,7 +46,6 @@ const drops = Array.from({ length: 160 }, (_, i) => ({
 </template>
 
 <style scoped>
-/* Pingos de chuva */
 .rain-drop-wrapper {
   position: absolute;
   top: -20px;

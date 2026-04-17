@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// Ondas sonoras estáticas — sem mouse tracking, sem notas musicais
 const waves = [
   { id: 0, x: 8, y: 25, size: 1.0, delay: 0 },
   { id: 1, x: 22, y: 55, size: 0.7, delay: 1.5 },
@@ -21,7 +20,6 @@ const waves = [
     class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none"
     aria-hidden="true"
   >
-    <!-- Ondas sonoras pulsantes (Ficam presas na Hero) -->
     <div
       v-for="wave in waves"
       :key="'wave-' + wave.id"
@@ -37,7 +35,6 @@ const waves = [
 </template>
 
 <style scoped>
-/* Ondas sonoras pulsantes */
 .sound-wave {
   position: absolute;
   width: 180px;
@@ -90,5 +87,4 @@ const waves = [
     opacity: 0.08;
   }
 }
-
 </style>
