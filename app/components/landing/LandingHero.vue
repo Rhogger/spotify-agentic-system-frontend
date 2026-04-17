@@ -98,10 +98,10 @@ const heroLine2 = 'ouvir.'.split('');
 
         <div class="scroll-indicator mt-6 flex flex-col items-center gap-1">
           <div
-            class="scroll-mouse border-2 border-primary/30 bg-primary/5 relative overflow-hidden rounded-full w-6 h-10"
+            class="scroll-mouse border-2 border-primary/30 bg-primary/5 flex justify-center pt-2 overflow-hidden rounded-full w-6 h-10"
           >
             <div
-              class="scroll-dot bg-primary w-1 h-2 rounded-sm absolute left-1/2 top-2 -translate-x-1/2"
+              class="scroll-dot bg-primary w-1 h-2 rounded-sm"
             />
           </div>
         </div>
@@ -175,11 +175,11 @@ const heroLine2 = 'ouvir.'.split('');
 @keyframes scroll-bounce {
   0%,
   100% {
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
     opacity: 1;
   }
   50% {
-    transform: translateX(-50%) translateY(14px);
+    transform: translateY(14px);
     opacity: 0.3;
   }
 }
