@@ -292,6 +292,54 @@ export function useLandingAnimations() {
           },
         });
       }
+
+      // 8. Feature cards — pinned stack com snap (desktop only)
+      // Cards usam position:absolute. GSAP pina o viewport e anima cada card
+      // de baixo pra cima com uma timeline scrubbed. Snap trava entre cards.
+      const featViewport =
+        document.querySelector<HTMLElement>('.features-viewport');
+      const featureRows = gsap.utils.toArray<HTMLElement>('.feature-row');
+
+      if (featViewport && featureRows.length > 1 && window.innerWidth >= 768) {
+        const totalCards = featureRows.length;
+
+        // Cards 1+ começam abaixo do viewport
+        featureRows.forEach((row, i) => {
+          if (i > 0) {
+            gsap.set(row, { y: window.innerHeight });
+          }
+        });
+
+        // Timeline: cada card (exceto o primeiro) desliza pra cima
+        const cardTl = gsap.timeline();
+        for (let i = 1; i < totalCards; i++) {
+          cardTl.to(
+            featureRows[i],
+            {
+              y: 0,
+              duration: 1,
+              ease: 'power2.inOut',
+            },
+            i - 1,
+          );
+        }
+        // Fase de hold: todos stackados e visíveis antes de despinar
+        cardTl.to({}, { duration: 1 });
+
+        ScrollTrigger.create({
+          animation: cardTl,
+          trigger: featViewport,
+          start: 'top top',
+          end: `+=${totalCards * window.innerHeight * 0.7}`,
+          pin: true,
+          scrub: 0.5,
+          snap: {
+            snapTo: 1 / totalCards,
+            duration: { min: 0.25, max: 0.6 },
+            delay: 0.1,
+          },
+        });
+      }
     });
   }
 
