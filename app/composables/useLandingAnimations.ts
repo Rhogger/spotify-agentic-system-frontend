@@ -89,7 +89,7 @@ export function useLandingAnimations() {
         rotateX: 14,
         stagger: { amount: 0.28, from: 'start' },
         duration: 0.85,
-        ease: 'power3.out',
+        ease: 'power1.out',
         transformPerspective: 900,
         scrollTrigger: {
           trigger: '#features',
@@ -293,50 +293,255 @@ export function useLandingAnimations() {
         });
       }
 
-      // 8. Feature cards — pinned stack com snap (desktop only)
-      // Cards usam position:absolute. GSAP pina o viewport e anima cada card
-      // de baixo pra cima com uma timeline scrubbed. Snap trava entre cards.
+      // 8. Features — Pinned Slider with Title
       const featViewport =
         document.querySelector<HTMLElement>('.features-viewport');
+      const titleRow =
+        document.querySelector<HTMLElement>('.feature-title-row');
       const featureRows = gsap.utils.toArray<HTMLElement>('.feature-row');
 
-      if (featViewport && featureRows.length > 1 && window.innerWidth >= 768) {
+      if (featViewport && titleRow && featureRows.length > 0) {
         const totalCards = featureRows.length;
+        const tl = gsap.timeline();
+        const snapProgress: number[] = [];
 
-        // Cards 1+ começam abaixo do viewport
+        // Title Entrance Animation (independent of scrub)
+        const titleTag = titleRow.querySelector('.feat-title-tag');
+        const titleWords = titleRow.querySelectorAll('.feat-title-word');
+        const titleDesc = titleRow.querySelector('.feat-title-desc');
+
+        ScrollTrigger.create({
+          trigger: featViewport,
+          start: 'top 75%',
+          onEnter: () => {
+            gsap.to(titleTag, {
+              opacity: 1,
+              y: '0%',
+              duration: 0.8,
+              ease: 'power3.out',
+            });
+            gsap.to(titleWords, {
+              opacity: 1,
+              y: '0%',
+              rotate: 0,
+              duration: 1,
+              ease: 'expo.out',
+              stagger: 0.1,
+              delay: 0.1,
+            });
+            gsap.to(titleDesc, {
+              opacity: 1,
+              y: '0%',
+              duration: 1,
+              ease: 'power3.out',
+              delay: 0.4,
+            });
+          },
+        });
+
+        // Setup Initial States for the timeline
+        gsap.set(titleRow, { opacity: 1, y: 0, pointerEvents: 'auto' });
+
         featureRows.forEach((row, i) => {
-          if (i > 0) {
-            gsap.set(row, { y: window.innerHeight });
+          const titleBox = row.querySelector('.feat-title-inner');
+          const numBox = row.querySelector('.feat-num-inner');
+          const bodyBox = row.querySelector('.feat-body-inner');
+          const imgBox = row.querySelector('.feat-img-box');
+          const orb = row.querySelector('.feat-neon-orb');
+
+          gsap.set(row, { opacity: 1, zIndex: i + 1, pointerEvents: 'none' });
+          gsap.set([titleBox, numBox, bodyBox], {
+            opacity: 0,
+            y: 80,
+            force3D: false,
+          });
+          gsap.set([imgBox, orb], { scale: 0, opacity: 0, force3D: false });
+        });
+
+        // Durations relative to scrub multiplier
+        const outputDuration = 0.5; // Fast exit
+        const delayDuration = 0.5; // Gap
+        const inputDuration = 1.0; // Smooth entrance
+        const holdDuration = 1.2; // Stay at y:0 for a while
+        const cycle =
+          outputDuration + delayDuration + inputDuration + holdDuration;
+
+        // Total scroll items: Title + N Features
+        const totalDuration = totalCards * cycle;
+        const addSnap = (time: number) =>
+          snapProgress.push(time / totalDuration);
+
+        // Helper for safe GSAP color interpolation
+        function getMixedBg(hexAccent: string | null): string {
+          if (!hexAccent) return 'rgb(34, 16, 17)'; // Red (#f43f5e) + Green mix default
+          const c1 = [
+            parseInt(hexAccent.slice(1, 3), 16),
+            parseInt(hexAccent.slice(3, 5), 16),
+            parseInt(hexAccent.slice(5, 7), 16),
+          ];
+          const c2 = [5, 10, 7]; // #050a07
+          const r = Math.round(c1[0] * 0.12 + c2[0] * 0.88);
+          const g = Math.round(c1[1] * 0.12 + c2[1] * 0.88);
+          const b = Math.round(c1[2] * 0.12 + c2[2] * 0.88);
+          return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // --- Step 0: Title ---
+        addSnap(0);
+        tl.to(
+          titleRow,
+          {
+            opacity: 0,
+            y: -100,
+            scale: 0.9,
+            roundProps: 'y',
+            force3D: false,
+            duration: outputDuration,
+            ease: 'power2.inOut',
+          },
+          0,
+        );
+        tl.to('.lp-root', { '--lp-bg': getMixedBg(null), duration: 0.01 }, 0);
+
+        // --- Steps 1 to N ---
+        featureRows.forEach((row, i) => {
+          const titleBox = row.querySelector('.feat-title-inner');
+          const numBox = row.querySelector('.feat-num-inner');
+          const bodyBox = row.querySelector('.feat-body-inner');
+          const imgBox = row.querySelector('.feat-img-box');
+          const orb = row.querySelector('.feat-neon-orb');
+          const accent = row.dataset.accent || '#38e07b';
+
+          const tStartTransition = i * cycle;
+          const tDelayStart = tStartTransition + outputDuration;
+          const tInStart = tDelayStart + delayDuration;
+          const tInEnd = tInStart + inputDuration;
+          const tHoldEnd = tInEnd + holdDuration;
+          const tSnapPoint = tInEnd + holdDuration / 2;
+          const tOutStart = tHoldEnd;
+
+          // Color change during delay gap using pre-calculated RGB
+          const prevAccent =
+            i === 0 ? null : featureRows[i - 1].dataset.accent || '#38e07b';
+          tl.fromTo(
+            '.lp-root',
+            { '--lp-bg': getMixedBg(prevAccent) },
+            {
+              '--lp-bg': getMixedBg(accent),
+              duration: delayDuration,
+              ease: 'none',
+            },
+            tDelayStart,
+          );
+
+          // Animate IN
+          tl.to(
+            [titleBox, numBox, bodyBox],
+            {
+              opacity: 1,
+              y: 0,
+              roundProps: 'y',
+              force3D: false,
+              duration: inputDuration,
+              ease: 'power1.inOut',
+              stagger: 0.1,
+            },
+            tInStart,
+          );
+          tl.to(
+            imgBox,
+            {
+              scale: 1,
+              opacity: 1,
+              force3D: false,
+              duration: inputDuration,
+              ease: 'power1.in',
+            },
+            tInStart,
+          );
+          tl.to(
+            orb,
+            {
+              scale: 1,
+              opacity: 0.15,
+              force3D: false,
+              duration: inputDuration,
+              ease: 'power1.in',
+            },
+            tInStart,
+          );
+
+          tl.set(
+            row,
+            { pointerEvents: 'auto' },
+            tInStart + inputDuration * 0.5,
+          );
+
+          // Hold state
+          addSnap(tSnapPoint);
+
+          // Animate OUT (Slides up, fades out fast, image scales to 0)
+          if (i < totalCards - 1) {
+            tl.to(
+              [titleBox, numBox, bodyBox],
+              {
+                opacity: 0,
+                y: -120,
+                roundProps: 'y',
+                force3D: false,
+                duration: outputDuration,
+                ease: 'power1.out',
+                stagger: 0.05,
+              },
+              tOutStart,
+            );
+            tl.to(
+              imgBox,
+              {
+                scale: 0,
+                opacity: 0,
+                force3D: false,
+                duration: outputDuration,
+                ease: 'power1.out',
+              },
+              tOutStart,
+            );
+            tl.to(
+              orb,
+              {
+                scale: 0,
+                opacity: 0,
+                force3D: false,
+                duration: outputDuration,
+                ease: 'power1.out',
+              },
+              tOutStart,
+            );
+
+            tl.set(
+              row,
+              { pointerEvents: 'none' },
+              tOutStart + outputDuration * 0.5,
+            );
           }
         });
 
-        // Timeline: cada card (exceto o primeiro) desliza pra cima
-        const cardTl = gsap.timeline();
-        for (let i = 1; i < totalCards; i++) {
-          cardTl.to(
-            featureRows[i],
-            {
-              y: 0,
-              duration: 1,
-              ease: 'power2.inOut',
-            },
-            i - 1,
-          );
-        }
-        // Fase de hold: todos stackados e visíveis antes de despinar
-        cardTl.to({}, { duration: 1 });
+        // Force exact duration
+        tl.set({}, {}, totalDuration);
 
+        // The ScrollTrigger that scrubs the timeline
         ScrollTrigger.create({
-          animation: cardTl,
+          animation: tl,
           trigger: featViewport,
           start: 'top top',
-          end: `+=${totalCards * window.innerHeight * 0.7}`,
+          end: `+=${totalCards * window.innerHeight * 1.5}`, // Total scroll distance
           pin: true,
-          scrub: 0.5,
+          scrub: 1, // Reduced from 1 to 0.15 for near-instant response
           snap: {
-            snapTo: 1 / totalCards,
-            duration: { min: 0.25, max: 0.6 },
-            delay: 0.1,
+            snapTo: snapProgress,
+            duration: { min: 0.2, max: 0.6 }, // Faster snap
+            delay: 0,
+            ease: 'power1.out',
           },
         });
       }

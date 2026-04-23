@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue';
+
 interface FeatureItem {
   icon: string;
   title: string;
@@ -59,98 +61,207 @@ const features: FeatureItem[] = [
   },
 ];
 
-const rowRefs = ref<HTMLElement[]>([]);
+// Pixel Perfect Logic: Force even container width to ensure integer column pixels
+const gridWrapperRefs = ref<HTMLElement[]>([]);
+const gridWidths = ref<Record<number, number>>({});
+let resizeObserver: ResizeObserver | null = null;
 
-// Navega até o card clicando na aba: calcula a posição de scroll
-// baseada no range do ScrollTrigger que pina a seção.
-function scrollToFeature(i: number): void {
-  const viewport = document.querySelector('.features-viewport');
-  if (!viewport) return;
-  const viewportTop = viewport.getBoundingClientRect().top + window.scrollY;
-  // Cada card ocupa 1 viewport de scroll no range pinado
-  const scrollPerCard = window.innerHeight * 0.7;
-  const target = viewportTop + i * scrollPerCard;
-  window.scrollTo({ top: target, behavior: 'smooth' });
-}
+onMounted(() => {
+  resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const target = entry.target as HTMLElement;
+      const index = parseInt(target.dataset.index || '0');
+      // Arredonda para baixo para o par mais próximo (ex: 547 -> 546)
+      // Isso garante que 50% seja sempre um número inteiro (ex: 273)
+      const roundedWidth = Math.floor(entry.contentRect.width / 2) * 2;
+      gridWidths.value[index] = roundedWidth;
+    }
+  });
+
+  gridWrapperRefs.value.forEach((el) => {
+    if (el) resizeObserver?.observe(el);
+  });
+});
+
+onUnmounted(() => {
+  resizeObserver?.disconnect();
+});
 </script>
 
 <template>
-  <section data-section="features" id="features" class="relative">
-    <!-- Cabeçalho da seção — flui normalmente antes do pin -->
-    <div class="px-6 md:px-14 pt-32">
-      <div class="max-w-6xl mx-auto w-full">
-        <div class="text-center mb-32 md:mb-48">
-          <p
-            class="text-[11px] text-primary/70 font-bold tracking-[0.25em] uppercase mb-4"
-          >
-            O que você pode fazer
-          </p>
+  <section data-section="features" id="features" class="relative w-full">
+    <!-- Pinned Slider Viewport -->
+    <div
+      class="features-viewport w-full h-screen relative bg-transparent overflow-hidden"
+    >
+      <!-- TITLE SECTION (Acts as feature 0) -->
+      <div
+        class="feature-title-row absolute inset-0 w-full h-full flex items-center justify-center px-6 md:px-14 z-20 pointer-events-none"
+      >
+        <div
+          class="max-w-4xl mx-auto w-full text-center flex flex-col items-center"
+        >
+          <div class="overflow-hidden mb-6">
+            <p
+              class="feat-title-tag text-[11px] text-primary/70 font-bold tracking-[0.25em] uppercase block transform translate-y-full opacity-0"
+            >
+              Descubra o Poder
+            </p>
+          </div>
           <h2
-            class="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-tight text-white mb-6"
+            class="text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-[1.2] text-white flex flex-wrap justify-center gap-x-4 gap-y-2"
           >
-            Música do jeito que<br />você sempre quis.
+            <span class="overflow-hidden">
+              <span
+                class="feat-title-word block transform translate-y-[110%] rotate-3 origin-bottom-left opacity-0"
+              >
+                Seu
+              </span>
+            </span>
+            <span class="overflow-hidden">
+              <span
+                class="feat-title-word block text-primary transform translate-y-[110%] rotate-3 origin-bottom-left opacity-0"
+              >
+                som.
+              </span>
+            </span>
+
+            <span class="overflow-hidden">
+              <span
+                class="feat-title-word block transform translate-y-[110%] rotate-3 origin-bottom-left opacity-0"
+              >
+                Suas
+              </span>
+            </span>
+
+            <span class="overflow-hidden">
+              <span
+                class="feat-title-word block text-primary transform translate-y-[110%] rotate-3 origin-bottom-left opacity-0"
+              >
+                regras.
+              </span>
+            </span>
           </h2>
+          <div class="overflow-hidden mt-8 max-w-xl">
+            <p
+              class="feat-title-desc text-lg md:text-xl text-white/60 font-medium leading-relaxed block transform translate-y-full opacity-0"
+            >
+              Não é apenas dar play. É assumir o controle total da sua
+              experiência musical interagindo com inteligência e ferramentas
+              exclusivas.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Viewport para Pinned Stack Cards — pinado via GSAP no desktop -->
-    <div class="features-viewport relative px-6 md:px-14 pb-16 md:pb-0">
-      <div class="features-stack max-w-6xl mx-auto w-full relative md:h-screen">
+      <!-- Cada feature ocupa a tela toda e fica sobreposta (absolute) -->
+      <div
+        v-for="(feature, i) in features"
+        :key="i"
+        class="feature-row absolute inset-0 w-full h-full flex items-center justify-center px-6 md:px-14 opacity-0 pointer-events-none"
+        :data-accent="feature.accent"
+      >
         <div
-          v-for="(feature, i) in features"
-          :key="i"
-          :ref="
-            (el) => {
-              if (el) rowRefs[i] = el as HTMLElement;
-            }
-          "
-          class="feature-row static md:absolute md:left-0 md:right-0 grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-8 mb-16 md:mb-0"
-          :style="{ top: `calc(15vh + ${i * 44}px)`, zIndex: i + 1 }"
+          class="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center"
         >
           <!-- Text Box Layout -->
           <div
-            class="feat-text-box relative w-full aspect-square md:aspect-auto md:h-auto lg:aspect-square transition-all duration-500 overflow-hidden grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 rounded-4xl bg-transparent"
+            ref="gridWrapperRefs"
+            :data-index="i"
+            class="feat-text-box mx-auto grid grid-cols-1 md:grid-cols-2 gap-0 bg-transparent"
             :class="i % 2 !== 0 ? 'md:order-2' : ''"
+            :style="{ width: gridWidths[i] ? `${gridWidths[i]}px` : '100%' }"
           >
-            <!-- Top Left: Title Box (Solid Background) -->
-            <div class="flex flex-col justify-center p-8 lg:p-10 rounded-tl-4xl" :style="{ backgroundColor: feature.accent }">
-              <h3 class="text-3xl lg:text-[2.25rem] font-medium text-[#0c0c0c] tracking-tight leading-snug">
-                {{ feature.title }}
-              </h3>
+            <!-- Top Left: Title Box -->
+            <div
+              class="feat-title-wrap aspect-square bg-transparent overflow-hidden relative min-h-0"
+            >
+              <div
+                class="feat-title-inner absolute inset-0 flex items-center justify-center"
+                :style="{ backgroundColor: feature.accent }"
+              >
+                <div class="max-w-[80%] text-left">
+                  <h3
+                    class="text-3xl lg:text-[2.25rem] font-medium text-[#0c0c0c] tracking-tight leading-snug"
+                  >
+                    {{ feature.title }}
+                  </h3>
+                </div>
+              </div>
             </div>
-            
-            <!-- Top Right: Number (Transparent bg, dark font) -->
-            <div class="hidden md:flex items-center justify-center p-8 lg:p-10 bg-transparent">
-              <span class="text-8xl lg:text-[9rem] font-bold leading-none opacity-80" :style="{ color: feature.accent }">
-                {{ i + 1 }}
-              </span>
+
+            <!-- Top Right: Number -->
+            <div
+              class="feat-num-wrap aspect-square hidden md:block bg-transparent overflow-hidden relative min-h-0"
+            >
+              <div
+                class="feat-num-inner absolute inset-0 flex items-center justify-center"
+              >
+                <span
+                  class="text-8xl lg:text-[9rem] font-bold leading-none opacity-80"
+                  :style="{ color: feature.accent }"
+                >
+                  {{ i + 1 }}
+                </span>
+              </div>
             </div>
-            
-            <!-- Bottom Left: Empty (Transparent bg) -->
-            <div class="hidden md:block bg-transparent"></div>
-            
-            <!-- Bottom Right: Body Text (Bordered, Transparent bg, colored text) -->
-            <div class="flex flex-col justify-center p-8 lg:p-10 md:border-l md:border-t bg-transparent" :style="{ borderColor: `color-mix(in srgb, ${feature.accent} 25%, transparent)` }">
-              <p class="text-base lg:text-lg leading-relaxed font-medium" :style="{ color: feature.accent }">
-                {{ feature.body }}
-              </p>
+
+            <!-- Bottom Left: Empty -->
+            <div
+              class="aspect-square hidden md:block bg-transparent min-h-0"
+            ></div>
+
+            <!-- Bottom Right: Body Text -->
+            <div
+              class="feat-body-wrap aspect-square bg-transparent overflow-hidden relative min-h-0"
+            >
+              <div
+                class="feat-body-inner absolute inset-0 flex items-center justify-center md:border"
+                :style="{
+                  borderColor: `color-mix(in srgb, ${feature.accent} 25%, transparent)`,
+                }"
+              >
+                <div class="max-w-[80%] text-left">
+                  <p
+                    class="text-base lg:text-lg leading-relaxed font-medium"
+                    :style="{ color: feature.accent }"
+                  >
+                    {{ feature.body }}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Image Box (Imagem full) -->
+          <!-- Image Box with Neon Orb -->
           <div
-            class="feat-img-box relative w-full aspect-square md:aspect-auto md:h-auto lg:aspect-square rounded-4xl bg-[#111] overflow-hidden shadow-2xl"
+            class="relative w-full aspect-square flex items-center justify-center"
             :class="i % 2 !== 0 ? 'md:order-1' : ''"
           >
-            <img
-              :src="feature.image"
-              :alt="feature.title"
-              class="w-full h-full object-cover"
-            />
+            <!-- Neon Orb -->
             <div
-              class="absolute inset-0 border border-white/10 rounded-4xl pointer-events-none"
+              class="feat-neon-orb absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+              :style="{
+                backgroundColor: feature.accent,
+                width: '130%',
+                height: '130%',
+                filter: 'blur(110px)',
+                opacity: 0,
+              }"
             ></div>
+
+            <div
+              class="feat-img-box w-full h-full bg-[#111] overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.4)] relative z-10"
+            >
+              <img
+                :src="feature.image"
+                :alt="feature.title"
+                class="feat-img w-full h-full object-cover origin-center transition-transform duration-300 hover:scale-[1.02]"
+              />
+              <div
+                class="absolute inset-0 border border-white/10 pointer-events-none"
+              ></div>
+            </div>
           </div>
         </div>
       </div>
@@ -159,7 +270,11 @@ function scrollToFeature(i: number): void {
 </template>
 
 <style scoped>
-/* Card stacking é controlado inteiramente por GSAP no desktop.
-   Os cards usam position:absolute + translateY animado via GSAP timeline.
-   No mobile (< md), cards ficam em flow estático normal. */
+.feat-title-inner,
+.feat-num-inner,
+.feat-body-inner {
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  will-change: transform, opacity;
+}
 </style>

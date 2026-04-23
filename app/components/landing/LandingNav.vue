@@ -31,9 +31,10 @@ const navSolid = computed(() => scrollY.value > 40);
     class="fixed top-0 inset-x-0 z-50 px-6 md:px-14 h-16 flex items-center justify-between transition-colors duration-500"
     :class="
       navSolid
-        ? 'bg-[#0b1810]/90 backdrop-blur-2xl border-b border-white/5'
+        ? 'backdrop-blur-2xl border-b border-white/5'
         : 'bg-transparent border-b border-transparent'
     "
+    :style="navSolid ? { backgroundColor: 'color-mix(in srgb, var(--lp-bg, #0b1810) 90%, transparent)' } : {}"
   >
     <div class="flex items-center gap-2.5">
       <UIcon name="i-simple-icons-spotify" class="w-5 h-5 text-primary" />

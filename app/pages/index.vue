@@ -13,8 +13,8 @@ async function handleLogin(): Promise<void> {
 
 <template>
   <div
-    class="lp-root bg-[#0b1810] text-white"
-    style="font-family: 'Spline Sans', sans-serif"
+    class="lp-root text-white transition-colors duration-700"
+    style="font-family: 'Spline Sans', sans-serif; background-color: var(--lp-bg, rgb(34, 16, 17));"
   >
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
       <div class="orb orb-1" />
